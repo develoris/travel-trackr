@@ -1,0 +1,78 @@
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+# Copia i token dalle risposte di login qui sotto per usarli nelle richieste successive
+@accessToken = <incolla_access_token>
+@refreshToken = <incolla_refresh_token>
+@userId = <incolla_user_id>
+
+
+### ──────────────────────────────────────────
+###  AUTH
+### ──────────────────────────────────────────
+
+### [SIGNIN] Registra un nuovo utente
+POST {{baseUrl}}/users/signin
+Content-Type: {{contentType}}
+
+{
+  "email": "mario@example.com",
+  "password": "password123",
+  "name": "Mario Rossi"
+}
+
+### [LOGIN] Accedi con le credenziali → copia accessToken e refreshToken dalla risposta
+POST {{baseUrl}}/users/login
+Content-Type: {{contentType}}
+
+{
+  "email": "mario@example.com",
+  "password": "password123"
+}
+
+### [REFRESH] Ruota i token (il refreshToken viene letto dal cookie tt.rt)
+POST {{baseUrl}}/users/refresh
+
+### [LOGOUT] Revoca la sessione (il refreshToken viene letto dal cookie tt.rt)
+POST {{baseUrl}}/users/logout
+
+
+### ──────────────────────────────────────────
+###  USERS – CRUD
+### ──────────────────────────────────────────
+
+### [GET ALL] Lista tutti gli utenti
+GET {{baseUrl}}/users
+
+### [GET ONE] Ottieni un singolo utente per ID
+GET {{baseUrl}}/users/{{userId}}
+
+### [POST] Crea un utente direttamente (bypassa signin)
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@example.com",
+  "passwordHash": "password123",
+  "name": "Admin",
+  "role": "admin"
+}
+
+### [PATCH] Aggiorna nome di un utente
+PATCH {{baseUrl}}/users/{{userId}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Mario Aggiornato"
+}
+
+### [PATCH] Aggiorna email di un utente
+PATCH {{baseUrl}}/users/{{userId}}
+Content-Type: {{contentType}}
+
+{
+  "email": "mario.nuovo@example.com"
+}
+
+### [DELETE] Elimina un utente
+DELETE {{baseUrl}}/users/{{userId}}
