@@ -131,3 +131,99 @@ Dettagli e linee guida: [docs/ERROR_HANDLING.md](docs/ERROR_HANDLING.md).
 ## Test rapido API
 
 Usa [requests.http](requests.http) con estensione REST Client di VS Code.
+
+## Release automation (major/minor/patch)
+
+Il repository include una GitHub Action in [.github/workflows/release.yml](.github/workflows/release.yml) che gira su push in `main`.
+
+Usa i Conventional Commits per calcolare automaticamente la versione SemVer:
+
+- `fix: ...` -> patch
+- `feat: ...` -> minor
+- `feat!: ...` oppure body con `BREAKING CHANGE:` -> major
+
+La action apre/aggiorna una Release PR con changelog e bump versione; quando la PR viene mergeata crea tag e release GitHub.
+
+### Come scrivere i commit
+
+Formato consigliato:
+
+```text
+tipo(scope opzionale): descrizione breve
+```
+
+Esempi pratici:
+
+- Hai fixato un errore:
+
+```bash
+git commit -m "fix(users): corregge errore login"
+```
+
+- Hai aggiunto un endpoint:
+
+```bash
+git commit -m "feat(users): aggiunge endpoint /users/export"
+```
+
+- Hai fatto una modifica breaking:
+
+```bash
+git commit -m "feat!(users): cambia payload di /users/login"
+```
+
+Oppure con nota esplicita nel body:
+
+```bash
+git commit -m "feat(users): cambia payload login" -m "BREAKING CHANGE: la risposta non contiene piu i token nel body"
+```
+
+### Mappa rapida bump versione
+
+- `fix` -> patch (`1.2.3` -> `1.2.4`)
+- `feat` -> minor (`1.2.3` -> `1.3.0`)
+- `feat!` / `BREAKING CHANGE` -> major (`1.2.3` -> `2.0.0`)
+
+Nota: commit generici come `manage users` non permettono alla release automation di capire il tipo di bump.
+
+### Token usato dalla action
+
+La workflow usa `secrets.GITHUB_TOKEN` in [.github/workflows/release.yml](.github/workflows/release.yml).
+
+- Questo token e generato automaticamente da GitHub ad ogni run.
+- Nella maggior parte dei casi non devi creare nulla a mano.
+- Il token e temporaneo (valido solo per quella esecuzione).
+
+Quando creare un token manuale (PAT):
+
+- se devi scrivere su un altro repository;
+- se hai policy che bloccano il token automatico;
+- se vuoi controllare scope e durata in modo esplicito.
+
+Passi per creare un PAT (fine-grained):
+
+1. GitHub -> Settings -> Developer settings -> Personal access tokens -> Fine-grained tokens.
+2. Clicca Generate new token.
+3. Scegli il repository `travel-trackr`.
+4. Dai permessi minimi: Contents (Read and write), Pull requests (Read and write).
+5. Copia il token (si vede una sola volta).
+6. Repository -> Settings -> Secrets and variables -> Actions -> New repository secret.
+7. Salvalo ad esempio come `RELEASE_PLEASE_TOKEN`.
+
+Se vuoi usare il token custom nella workflow, sostituisci il campo `token` con il secret custom in [.github/workflows/release.yml](.github/workflows/release.yml).
+
+### Rollback versioni
+
+Si: con release/tag GitHub hai uno storico versioni utile per rollback.
+
+- Ogni release crea un tag (es. `v1.3.0`).
+- Puoi tornare a una versione precedente facendo checkout del tag.
+- Se devi correggere in produzione, tipicamente fai revert del commit/PR problematico e rilasci una nuova patch.
+
+Esempi pratici:
+
+- vedere i tag: `git tag --sort=-creatordate`
+- provare una versione: `git checkout v1.2.4`
+- creare branch da versione stabile: `git checkout -b hotfix/from-v1.2.4 v1.2.4`
+
+Nota: GitHub salva cronologia git (commit/tag/release). I dati runtime (es. database) non vengono rollbackati automaticamente.
