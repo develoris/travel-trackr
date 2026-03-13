@@ -5,6 +5,8 @@
 @accessToken = <incolla_access_token>
 @refreshToken = <incolla_refresh_token>
 @userId = <incolla_user_id>
+@tripId = <incolla_trip_id>
+@stageId = <incolla_stage_id>
 
 
 ### ──────────────────────────────────────────
@@ -76,3 +78,67 @@ Content-Type: {{contentType}}
 
 ### [DELETE] Elimina un utente
 DELETE {{baseUrl}}/users/{{userId}}
+
+
+### ──────────────────────────────────────────
+###  TRAVELS – API (Bearer Token)
+### ──────────────────────────────────────────
+
+### [GET ALL] Lista viaggi del mio utente
+GET {{baseUrl}}/users/travels
+Authorization: Bearer {{accessToken}}
+
+### [POST] Crea viaggio
+POST {{baseUrl}}/users/travels
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Weekend in Appennino",
+  "category": "trekking",
+  "status": "planned",
+  "startDate": "2026-05-09",
+  "endDate": "2026-05-10",
+  "locationSummary": "Corno alle Scale",
+  "description": "Due giorni tra sentieri e rifugio"
+}
+
+### [GET ONE] Dettaglio viaggio
+GET {{baseUrl}}/users/travels/{{tripId}}
+Authorization: Bearer {{accessToken}}
+
+### [POST] Aggiungi tappa al viaggio
+POST {{baseUrl}}/users/travels/{{tripId}}/stages
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Sentiero del Corno",
+  "kind": "trek",
+  "location": "Corno alle Scale",
+  "description": "Tappa principale"
+}
+
+### [POST] Aggiungi spesa a una tappa
+POST {{baseUrl}}/users/travels/{{tripId}}/stages/{{stageId}}/expenses
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Pranzo rifugio",
+  "amount": 22.5,
+  "category": "cibo"
+}
+
+### [PATCH] Aggiorna stato viaggio
+PATCH {{baseUrl}}/users/travels/{{tripId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "status": "completed"
+}
+
+### [DELETE] Elimina viaggio
+DELETE {{baseUrl}}/users/travels/{{tripId}}
+Authorization: Bearer {{accessToken}}

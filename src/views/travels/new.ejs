@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include("../partials/head", { title: "Nuovo viaggio" }) %>
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <%- include("../partials/navbar", { user }) %>
+
+  <main class="flex-grow-1 py-5">
+    <div class="container">
+      <%- include("../partials/flash") %>
+
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h1 class="h3 fw-bold mb-0">Nuovo viaggio</h1>
+            <a href="/users/app/travels" class="btn btn-outline-secondary btn-sm">Torna alla lista</a>
+          </div>
+
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <form method="POST" action="/users/app/travels" class="row g-3" novalidate>
+                <div class="col-12">
+                  <label class="form-label fw-semibold" for="title">Titolo</label>
+                  <input class="form-control" id="title" name="title" required placeholder="Weekend sulle Dolomiti" />
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold" for="category">Categoria</label>
+                  <select class="form-select" id="category" name="category">
+                    <option value="vacanza">Vacanza</option>
+                    <option value="trekking">Trekking</option>
+                    <option value="escursione">Escursione</option>
+                    <option value="visita">Viaggio visita</option>
+                    <option value="roadtrip">Roadtrip</option>
+                    <option value="altro">Altro</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold" for="status">Stato</label>
+                  <select class="form-select" id="status" name="status">
+                    <option value="planned">Planned</option>
+                    <option value="ongoing">Ongoing</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold" for="startDate">Data inizio</label>
+                  <input class="form-control" id="startDate" name="startDate" type="date" required />
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold" for="endDate">Data fine</label>
+                  <input class="form-control" id="endDate" name="endDate" type="date" />
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label fw-semibold" for="locationSummary">Localita principali</label>
+                  <input class="form-control" id="locationSummary" name="locationSummary" placeholder="Cortina, Tre Cime, Lago di Braies" />
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label fw-semibold" for="description">Descrizione</label>
+                  <textarea class="form-control" id="description" name="description" rows="3" placeholder="Obiettivi, idea viaggio, persone coinvolte"></textarea>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label fw-semibold" for="notes">Note</label>
+                  <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Checklist, meteo, attrezzatura"></textarea>
+                </div>
+
+                <div class="col-12 d-flex gap-2 justify-content-end">
+                  <a href="/users/app/travels" class="btn btn-light">Annulla</a>
+                  <button type="submit" class="btn btn-primary">Crea viaggio</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center text-muted py-3 small border-top mt-auto">
+    &copy; <%= new Date().getFullYear() %> Travel Trackr
+  </footer>
+</body>
+</html>
