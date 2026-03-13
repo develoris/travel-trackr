@@ -29,6 +29,19 @@ cp .env.example .env
 node src/index.js
 ```
 
+Per testare l'app senza MongoDB esterno:
+
+```bash
+npm run start:mock
+```
+
+In modalita mock vengono creati automaticamente utenti demo (idempotenti):
+
+- email: `demo.user@travel-trackr.local` - password: `Password123!`
+- email: `demo.admin@travel-trackr.local` - password: `Password123!`
+
+Per disattivare il seed automatico imposta `SEED_MOCK_DATA=false`.
+
 Server locale: http://localhost:3000
 
 ## Variabili ambiente
@@ -44,6 +57,8 @@ Server locale: http://localhost:3000
 | ACCESS_TOKEN_TTL | Durata access token | 15m |
 | REFRESH_TOKEN_DAYS | Giorni validita refresh token | 30 |
 | CORS_ORIGIN | Origin frontend consentita | http://localhost:5173 |
+| USE_IN_MEMORY_DB | Se true usa mongodb-memory-server | false |
+| SEED_MOCK_DATA | Se true crea utenti demo in start:mock | true |
 
 ## URL principali
 

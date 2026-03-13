@@ -14,6 +14,11 @@ Responsabilita principali:
 4. Reindirizza GET / verso /users/app.
 5. Monta il router users su /users.
 
+Modalita DB:
+
+1. Standard: usa MONGODB_URI.
+2. Demo/mock: con USE_IN_MEMORY_DB=true avvia Mongo in-memory (mongodb-memory-server).
+
 In pratica, tutto il traffico applicativo passa dal modulo users.
 
 ## 2. Modulo users

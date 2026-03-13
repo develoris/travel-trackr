@@ -30,13 +30,12 @@ UserSchema.set("toJSON", {
   }
 });
 
-UserSchema.pre("save", async function preSave(next) {
+UserSchema.pre("save", async function preSave() {
   if (!this.isModified("passwordHash")) {
-    return next();
+    return;
   }
 
   this.passwordHash = await bcrypt.hash(this.passwordHash, 10);
-  return next();
 });
 
 UserSchema.methods.verifyPassword = function verifyPassword(password) {

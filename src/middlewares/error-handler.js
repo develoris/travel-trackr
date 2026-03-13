@@ -17,16 +17,18 @@ export const errorHandler = (error, req, res, _next) => {
   const status = appError.status || 500;
   const requestId = req.requestId || "n/a";
 
-  console.error("[ERROR]", {
-    requestId,
-    method: req.method,
-    url: req.originalUrl,
-    code: appError.code,
-    status,
-    message: appError.developerMessage,
-    details: appError.details,
-    stack: appError.stack
-  });
+  // Log compatto e leggibile: evita dump rumorosi di oggetti Error annidati.
+  console.error(
+    `[ERROR] requestId=${requestId} method=${req.method} url=${req.originalUrl} status=${status} code=${appError.code} message=${appError.developerMessage}`
+  );
+
+  if (appError.details) {
+    console.error("[ERROR_DETAILS]", appError.details);
+  }
+
+  if (process.env.NODE_ENV !== "production" && appError.stack) {
+    console.error(appError.stack);
+  }
 
   if (isApiRequest(req)) {
     return res.status(status).json({

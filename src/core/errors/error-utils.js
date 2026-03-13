@@ -18,5 +18,12 @@ export const toAppError = (error) => {
 export const isApiRequest = (req) => req.path.startsWith("/users") && !req.path.startsWith("/users/app");
 
 export const asyncHandler = (handler) => (req, res, next) => {
-  Promise.resolve(handler(req, res, next)).catch(next);
+  const execution = Promise.resolve().then(() => handler(req, res, next));
+
+  if (typeof next === "function") {
+    return execution.catch(next);
+  }
+
+  // In Express 5 il framework gestisce promise rejection anche senza next esplicito.
+  return execution;
 };

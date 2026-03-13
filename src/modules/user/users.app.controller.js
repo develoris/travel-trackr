@@ -39,15 +39,6 @@ export const getAppLogin = (_req, res) => {
 export const postAppLogin = async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    throw new AppError({
-      code: "INVALID_FORM",
-      status: 400,
-      userMessage: "Email e password sono obbligatorie.",
-      redirectTo: "/users/app/login"
-    });
-  }
-
   const result = await loginUser({ email, password });
 
   if (!result) {
@@ -75,34 +66,7 @@ export const getAppRegister = (_req, res) => {
 };
 
 export const postAppRegister = async (req, res) => {
-  const { email, password, confirmPassword, name } = req.body;
-
-  if (!email || !password) {
-    throw new AppError({
-      code: "INVALID_FORM",
-      status: 400,
-      userMessage: "Email e password sono obbligatorie.",
-      redirectTo: "/users/app/register"
-    });
-  }
-
-  if (password.length < 8) {
-    throw new AppError({
-      code: "WEAK_PASSWORD",
-      status: 400,
-      userMessage: "La password deve avere almeno 8 caratteri.",
-      redirectTo: "/users/app/register"
-    });
-  }
-
-  if (password !== confirmPassword) {
-    throw new AppError({
-      code: "PASSWORD_MISMATCH",
-      status: 400,
-      userMessage: "Le password non coincidono.",
-      redirectTo: "/users/app/register"
-    });
-  }
+  const { email, password, name } = req.body;
 
   const user = await registerUser({ email, password, name });
 

@@ -9,9 +9,21 @@ const router = Router();
 // EJS routes
 router.get("/app", web.withFlash, web.requireWebAuth, asyncHandler(web.getAppHome));
 router.get("/app/login", web.withFlash, web.redirectIfAuthenticated, asyncHandler(web.getAppLogin));
-router.post("/app/login", web.redirectIfAuthenticated, asyncHandler(web.postAppLogin));
+router.post(
+	"/app/login",
+	web.redirectIfAuthenticated,
+	v.appLoginValidator,
+	v.validateWebRequest("/users/app/login"),
+	asyncHandler(web.postAppLogin)
+);
 router.get("/app/register", web.withFlash, web.redirectIfAuthenticated, asyncHandler(web.getAppRegister));
-router.post("/app/register", web.redirectIfAuthenticated, asyncHandler(web.postAppRegister));
+router.post(
+	"/app/register",
+	web.redirectIfAuthenticated,
+	v.appRegisterValidator,
+	v.validateWebRequest("/users/app/register"),
+	asyncHandler(web.postAppRegister)
+);
 router.post("/app/logout", asyncHandler(web.postAppLogout));
 
 // API routes
