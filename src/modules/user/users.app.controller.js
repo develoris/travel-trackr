@@ -29,7 +29,11 @@ export const redirectToApp = (_req, res) => {
 };
 
 export const getAppHome = (req, res) => {
-  return res.render("index", { user: req.session.webUser });
+  if (!req.session.webUser) {
+    return res.redirect("/users/app/login");
+  }
+
+  return res.redirect("/users/app/travels");
 };
 
 export const getAppLogin = (_req, res) => {

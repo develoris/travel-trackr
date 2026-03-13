@@ -70,6 +70,13 @@ Server locale: http://localhost:3000
 - GET /users/app/register
 - POST /users/app/register
 - POST /users/app/logout
+- GET /users/app/travels
+- GET /users/app/travels/new
+- POST /users/app/travels
+- GET /users/app/travels/:tripId
+- POST /users/app/travels/:tripId/stages
+- POST /users/app/travels/:tripId/stages/:stageId/expenses
+- POST /users/app/travels/:tripId/delete
 
 ### API users
 
@@ -86,6 +93,16 @@ Server locale: http://localhost:3000
 - POST /users/refresh
 - POST /users/logout
 
+### API travels (JWT Bearer)
+
+- GET /users/travels
+- POST /users/travels
+- GET /users/travels/:tripId
+- PATCH /users/travels/:tripId
+- DELETE /users/travels/:tripId
+- POST /users/travels/:tripId/stages
+- POST /users/travels/:tripId/stages/:stageId/expenses
+
 ## Struttura progetto
 
 ```text
@@ -96,6 +113,13 @@ src/
         authorize.js
     modules/
         travel/
+            index.js
+            travel.model.js
+            travel.service.js
+            travel.controller.js
+            travels.app.controller.js
+            travel.routes.js
+            travel.validator.js
         user/
             index.js
             user.model.js

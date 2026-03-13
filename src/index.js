@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 import { userRouter } from "./modules/user/index.js";
+import { travelRouter } from "./modules/travel/index.js";
 import requestId from "./middlewares/request-id.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error-handler.js";
 import { connectDatabase, disconnectDatabase } from "./config/database.js";
@@ -55,6 +56,7 @@ const bootstrap = async () => {
   app.set("view engine", "ejs");
   app.set("views", join(__dirname, "views"));
   app.get("/", (_req, res) => res.redirect("/users/app"));
+  app.use("/users", travelRouter);
   app.use("/users", userRouter);
   app.use(notFoundHandler);
   app.use(errorHandler);
