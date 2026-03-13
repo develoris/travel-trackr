@@ -314,6 +314,7 @@ export const getAppTravelReportPdf = async (req, res) => {
   const dayGroups = buildDayGroups(stageTimeline);
   const generatedAt = new Date();
   const safeTitle = normalizeFileName(trip.title);
+  const stamp = generatedAt.toISOString().replace(/[:.]/g, "-");
   const allExpenses = stageTimeline.flatMap((stage) => stage.expenses || []);
   const spendingByCategory = allExpenses.reduce((acc, expense) => {
     const category = expense.category || "altro";
@@ -322,7 +323,10 @@ export const getAppTravelReportPdf = async (req, res) => {
   }, {});
 
   res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename="report-${safeTitle}.pdf"`);
+  res.setHeader("Content-Disposition", `attachment; filename="report-${safeTitle}-${stamp}.pdf"`);
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
 
   const doc = new PDFDocument({ size: "A4", margin: 44 });
   doc.pipe(res);
@@ -425,7 +429,7 @@ export const getAppTravelReportPdf = async (req, res) => {
     y: cardsY + cardHeight + 10,
     w: cardWidth,
     h: cardHeight,
-    label: "Tappe / Attivita",
+    label: "Giorni / Attivita",
     value: `${trip.stats?.daysCount || 0} / ${stageTimeline.length}`
   });
   drawStatCard({
@@ -499,13 +503,13 @@ export const getAppTravelReportPdf = async (req, res) => {
     doc.font("Helvetica").fontSize(11).fillColor(palette.muted).text("Nessuna attivita presente nel viaggio.");
   }
 
-  // Sezioni per tappa con card attivita leggibili anche in stampa.
+  // Sezioni per giorno con card attivita leggibili anche in stampa.
   dayGroups.forEach((group) => {
     ensurePdfSpace(doc, 95);
 
     const dayLabel = group.dayNumber === Number.MAX_SAFE_INTEGER
-      ? "Senza tappa assegnata"
-      : `Tappa ${group.dayNumber}`;
+      ? "Senza giorno assegnato"
+      : `Giorno ${group.dayNumber}`;
     const daySpent = group.activities.reduce((sum, activity) => sum + getStageSpent(activity), 0);
 
     const dayHeaderY = doc.y;

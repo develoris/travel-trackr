@@ -15,6 +15,7 @@ Per una spiegazione piu tecnica, leggi:
 - [docs/ERROR_HANDLING.md](docs/ERROR_HANDLING.md)
 - [docs/USER_ACCESS_AND_ADMIN.md](docs/USER_ACCESS_AND_ADMIN.md)
 - [docs/BACKUP_AND_RESTORE.md](docs/BACKUP_AND_RESTORE.md)
+- [docs/openapi/README.md](docs/openapi/README.md)
 
 ## Stack
 
@@ -89,6 +90,32 @@ Comandi principali:
 Approfondimento: [docs/BACKUP_AND_RESTORE.md](docs/BACKUP_AND_RESTORE.md).
 
 ## URL principali
+
+## API Docs (Swagger)
+
+La documentazione Swagger include solo API REST JSON (non endpoint EJS `/users/app/*`).
+
+- UI: `/api-docs`
+- OpenAPI YAML: `/api-docs/openapi.yaml`
+- OpenAPI JSON: `/api-docs/openapi.json`
+
+Spec su repository:
+
+- YAML source of truth: [docs/openapi/travel-trackr.openapi.yaml](docs/openapi/travel-trackr.openapi.yaml)
+- JSON generated artifact: [docs/openapi/travel-trackr.openapi.json](docs/openapi/travel-trackr.openapi.json)
+
+Per rigenerare JSON da YAML:
+
+```bash
+npm run openapi:export-json
+```
+
+Autenticazione token in Swagger:
+
+1. fai login su `POST /users/login`
+2. copia `accessToken` dalla risposta
+3. clicca Authorize in Swagger UI
+4. incolla: `Bearer <token>`
 
 ### Web (EJS)
 

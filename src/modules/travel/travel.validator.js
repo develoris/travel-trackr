@@ -78,26 +78,26 @@ export const appAddStageValidator = [
   body("activityType").optional().isIn(stageActivityTypes).withMessage("Tipo attivita non valido"),
   body("kind").optional().isIn(stageActivityTypes).withMessage("Tipo attivita non valido"),
   body("dayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Giorno non valido"),
-  body("existingDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Tappa esistente non valida"),
-  body("newDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Nuova tappa non valida"),
+  body("existingDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Giorno esistente non valido"),
+  body("newDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Nuovo giorno non valido"),
   body("startTime").optional({ values: "falsy" }).matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage("Orario non valido"),
   body().custom((_, { req }) => {
     const mode = req.body.dayMode;
     const hasAnyDayNumber = Boolean(req.body.dayNumber || req.body.existingDayNumber || req.body.newDayNumber);
 
-    // Se l'utente sceglie tappa esistente, il numero deve essere specificato.
+    // Se l'utente sceglie giorno esistente, il numero deve essere specificato.
     if (mode === "existing" && !(req.body.existingDayNumber || req.body.dayNumber)) {
-      throw new Error("Seleziona una tappa esistente");
+      throw new Error("Seleziona un giorno esistente");
     }
 
-    // Se l'utente sceglie nuova tappa, il numero puo essere vuoto:
-    // verra assegnata automaticamente la prossima tappa disponibile.
+    // Se l'utente sceglie nuovo giorno, il numero puo essere vuoto:
+    // verra assegnato automaticamente il prossimo giorno disponibile.
     if (mode === "new") {
       return true;
     }
 
     if (!hasAnyDayNumber) {
-      throw new Error("Seleziona una tappa esistente o crea una nuova tappa");
+      throw new Error("Seleziona un giorno esistente o crea un nuovo giorno");
     }
 
     return true;
@@ -118,12 +118,12 @@ export const appUpdateTripValidator = [
 
 export const appUpdateStageValidator = [
   ...tripIdValidator,
-  param("stageId").isMongoId().withMessage("Tappa non valida"),
-  body("title").trim().notEmpty().withMessage("Titolo tappa obbligatorio").isLength({ max: 120 }),
+  param("stageId").isMongoId().withMessage("Attivita non valida"),
+  body("title").trim().notEmpty().withMessage("Titolo attivita obbligatorio").isLength({ max: 120 }),
   body("activityType").optional().isIn(stageActivityTypes).withMessage("Tipo attivita non valido"),
   body("dayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Giorno non valido"),
-  body("existingDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Tappa esistente non valida"),
-  body("newDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Nuova tappa non valida"),
+  body("existingDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Giorno esistente non valido"),
+  body("newDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Nuovo giorno non valido"),
   body("startTime").optional({ values: "falsy" }).matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage("Orario non valido"),
   body("startAt").optional({ values: "falsy" }).isISO8601().withMessage("Data/ora inizio non valida"),
   body("endAt").optional({ values: "falsy" }).isISO8601().withMessage("Data/ora fine non valida")
@@ -131,7 +131,7 @@ export const appUpdateStageValidator = [
 
 export const appAddExpenseValidator = [
   ...tripIdValidator,
-  param("stageId").isMongoId().withMessage("Tappa non valida"),
+  param("stageId").isMongoId().withMessage("Attivita non valida"),
   body("title").trim().notEmpty().withMessage("Titolo spesa obbligatorio").isLength({ max: 120 }),
   body("amount").notEmpty().withMessage("Importo obbligatorio").isFloat({ min: 0 })
 ];

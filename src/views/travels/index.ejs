@@ -89,7 +89,7 @@
                   <p class="card-text small flex-grow-1 mb-3"><%= trip.description || 'Nessuna descrizione generale.' %></p>
                   <ul class="list-unstyled text-muted small mb-3">
                     <li><i class="bi bi-calendar-event me-1"></i><%= new Date(trip.startDate).toLocaleDateString('it-IT') %> - <%= new Date(trip.endDate).toLocaleDateString('it-IT') %></li>
-                    <li><i class="bi bi-signpost me-1"></i><%= trip.stats?.daysCount || 0 %> tappe</li>
+                    <li><i class="bi bi-signpost me-1"></i><%= trip.stats?.daysCount || 0 %> giorni</li>
                     <li><i class="bi bi-list-check me-1"></i><%= trip.stats?.activitiesCount || 0 %> attivita</li>
                     <li><i class="bi bi-cash-stack me-1"></i>EUR <%= Number(trip.stats?.totalSpent || 0).toFixed(2) %></li>
                   </ul>

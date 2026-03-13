@@ -13,6 +13,7 @@ import { errorHandler, notFoundHandler } from "./middlewares/error-handler.js";
 import { connectDatabase, disconnectDatabase } from "./config/database.js";
 import { seedMockData } from "./scripts/seed-mock-data.js";
 import { startBackupCron } from "./scripts/backup-cron.js";
+import { createOpenApiRouter } from "./openapi/openapi.router.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -67,6 +68,7 @@ const bootstrap = async () => {
 
   app.set("view engine", "ejs");
   app.set("views", join(__dirname, "views"));
+  app.use("/api-docs", createOpenApiRouter());
   app.get("/", (_req, res) => res.redirect("/users/app"));
   app.use("/users", travelRouter);
   app.use("/users", userRouter);

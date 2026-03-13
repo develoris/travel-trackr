@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
   <div class="container">
-    <% const currentPath = typeof currentPath !== 'undefined' ? currentPath : ''; %>
-    <% const isActive = (prefix) => currentPath === prefix || currentPath.startsWith(`${prefix}/`); %>
+    <% const currentPathValue = typeof currentPath !== 'undefined' ? currentPath : ''; %>
+    <% const isActive = (prefix) => currentPathValue === prefix || currentPathValue.startsWith(`${prefix}/`); %>
 
     <!-- Logo -->
     <a class="navbar-brand d-flex align-items-center gap-2" href="/users/app">
@@ -29,7 +29,7 @@
             <a class="nav-link <%= isActive('/users/app/travels') ? 'active' : '' %>" href="/users/app/travels"><i class="bi bi-backpack2 me-1"></i>I miei viaggi</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link <%= currentPath === '/users/app/travels/new' ? 'active' : '' %>" href="/users/app/travels/new"><i class="bi bi-plus-circle me-1"></i>Nuovo viaggio</a>
+            <a class="nav-link <%= currentPathValue === '/users/app/travels/new' ? 'active' : '' %>" href="/users/app/travels/new"><i class="bi bi-plus-circle me-1"></i>Nuovo viaggio</a>
           </li>
           <li class="nav-item">
             <a class="nav-link disabled text-muted" href="#"

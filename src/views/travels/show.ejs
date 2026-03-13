@@ -33,7 +33,7 @@
           <div class="card h-100"><div class="card-body"><div class="text-muted small">Durata</div><div class="fw-semibold small"><%= new Date(trip.startDate).toLocaleDateString('it-IT') %> - <%= new Date(trip.endDate).toLocaleDateString('it-IT') %></div></div></div>
         </div>
         <div class="col-6 col-md-3">
-          <div class="card h-100"><div class="card-body"><div class="text-muted small">Tappe (giorni)</div><div class="fw-semibold"><%= trip.stats?.daysCount || 0 %></div></div></div>
+          <div class="card h-100"><div class="card-body"><div class="text-muted small">Giorni pianificati</div><div class="fw-semibold"><%= trip.stats?.daysCount || 0 %></div></div></div>
         </div>
         <div class="col-6 col-md-3">
           <div class="card h-100"><div class="card-body"><div class="text-muted small">Attivita</div><div class="fw-semibold"><%= trip.stats?.activitiesCount || trip.stats?.stagesCount || 0 %></div></div></div>
@@ -76,7 +76,7 @@
 
       <!-- Section header -->
       <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <h2 class="h5 mb-0">Tappe e attivita</h2>
+        <h2 class="h5 mb-0">Giorni e attivita</h2>
         <div class="d-flex gap-2">
           <button class="btn btn-outline-secondary btn-sm" id="btnCollapseAll" type="button">Chiudi tutte</button>
           <button class="btn btn-outline-secondary btn-sm" id="btnExpandAll" type="button">Esplodi tutte</button>
@@ -96,7 +96,7 @@
         </div>
       <% } else { %>
 
-      <!-- Accordion tappe -->
+      <!-- Accordion giorni -->
       <div class="accordion" id="daysAccordion">
         <% dayGroups.forEach((group, idx) => { %>
           <% const dayId = group.dayNumber === Number.MAX_SAFE_INTEGER ? 'unset' : group.dayNumber; %>
@@ -105,9 +105,9 @@
             <h2 class="accordion-header">
               <button class="accordion-button <%= isOpen ? '' : 'collapsed' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDay<%= dayId %>" aria-expanded="<%= isOpen %>">
                 <% if (group.dayNumber === Number.MAX_SAFE_INTEGER) { %>
-                  <span class="fw-semibold">Attivita senza tappa</span>
+                  <span class="fw-semibold">Attivita senza giorno</span>
                 <% } else { %>
-                  <span class="fw-semibold">Tappa <%= group.dayNumber %></span>
+                  <span class="fw-semibold">Giorno <%= group.dayNumber %></span>
                 <% } %>
                 <span class="badge bg-secondary ms-2"><%= group.activities.length %></span>
               </button>
@@ -137,7 +137,7 @@
                             <form action="/users/app/travels/<%= trip._id %>/stages/<%= stage._id %>/update" method="POST" class="row g-2">
                               <div class="col-12 col-md-7"><label class="form-label small text-muted mb-1">Titolo</label><input class="form-control form-control-sm" name="title" value="<%= stage.title %>" required /></div>
                               <div class="col-12 col-md-5"><label class="form-label small text-muted mb-1">Tipo</label><select class="form-select form-select-sm" name="activityType"><% ['trek','visita','trasferimento','food','relax','outdoor','altro'].forEach((type) => { %><option value="<%= type %>" <%= stage.activityType === type ? 'selected' : '' %>><%= type %></option><% }) %></select></div>
-                              <div class="col-12 col-md-6"><label class="form-label small text-muted mb-1">Tappa (giorno)</label><input class="form-control form-control-sm" type="number" min="1" step="1" name="dayNumber" value="<%= stage.dayNumber || '' %>" /></div>
+                              <div class="col-12 col-md-6"><label class="form-label small text-muted mb-1">Giorno</label><input class="form-control form-control-sm" type="number" min="1" step="1" name="dayNumber" value="<%= stage.dayNumber || '' %>" /></div>
                               <div class="col-12 col-md-6"><label class="form-label small text-muted mb-1">Orario inizio</label><input class="form-control form-control-sm" type="time" name="startTime" value="<%= stage.startAt ? new Date(stage.startAt).toISOString().slice(11,16) : '' %>" /></div>
                               <div class="col-12"><label class="form-label small text-muted mb-1">Luogo</label><input class="form-control form-control-sm" name="location" value="<%= stage.location || '' %>" /></div>
                               <div class="col-12"><label class="form-label small text-muted mb-1">Descrizione</label><textarea class="form-control form-control-sm" name="description" rows="2"><%= stage.description || '' %></textarea></div>

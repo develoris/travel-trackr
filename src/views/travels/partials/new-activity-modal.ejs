@@ -7,7 +7,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="text-muted small">Scegli una tappa esistente o creane una nuova. L'ordine e automatico in base all'ora di inizio.</p>
+        <p class="text-muted small">Scegli un giorno esistente o creane uno nuovo. L'ordine e automatico in base all'ora di inizio.</p>
         <form action="/users/app/travels/<%= trip._id %>/stages" method="POST" id="newActivityForm" class="row g-3">
           <div class="col-12 col-md-8">
             <label class="form-label small text-muted mb-1">Titolo attivita</label>
@@ -30,27 +30,27 @@
             <div class="d-flex gap-4">
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="dayMode" id="modalDayModeExisting" value="existing" <%= (dayOptions && dayOptions.length > 0) ? 'checked' : '' %> />
-                <label class="form-check-label" for="modalDayModeExisting">Tappa esistente</label>
+                <label class="form-check-label" for="modalDayModeExisting">Giorno esistente</label>
               </div>
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="dayMode" id="modalDayModeNew" value="new" <%= (!dayOptions || dayOptions.length === 0) ? 'checked' : '' %> />
-                <label class="form-check-label" for="modalDayModeNew">Nuova tappa</label>
+                <label class="form-check-label" for="modalDayModeNew">Nuovo giorno</label>
               </div>
             </div>
           </div>
           <div class="col-12 col-md-6" id="modalExistingDayWrap">
-            <label class="form-label small text-muted mb-1">Tappa esistente</label>
+            <label class="form-label small text-muted mb-1">Giorno esistente</label>
             <select class="form-select" name="existingDayNumber">
-              <option value="">Seleziona tappa</option>
+              <option value="">Seleziona giorno</option>
               <% (dayOptions || []).forEach((dayNumber) => { %>
-                <option value="<%= dayNumber %>">Tappa <%= dayNumber %></option>
+                <option value="<%= dayNumber %>">Giorno <%= dayNumber %></option>
               <% }) %>
             </select>
           </div>
           <div class="col-12 col-md-6" id="modalNewDayWrap">
-            <label class="form-label small text-muted mb-1">Numero nuova tappa</label>
+            <label class="form-label small text-muted mb-1">Numero nuovo giorno</label>
             <input class="form-control" type="number" min="1" step="1" name="newDayNumber" placeholder="Es. 3" />
-            <div class="form-text">Se lo lasci vuoto, viene creata automaticamente la prossima tappa disponibile.</div>
+            <div class="form-text">Se lo lasci vuoto, viene creato automaticamente il prossimo giorno disponibile.</div>
           </div>
           <div class="col-12 col-md-6">
             <label class="form-label small text-muted mb-1">Orario inizio (opzionale)</label>
