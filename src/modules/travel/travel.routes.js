@@ -26,6 +26,14 @@ router.post(
   asyncHandler(app.postAppUpdateTravel)
 );
 router.get("/app/travels/:tripId", withFlash, app.requireWebAuth, v.tripIdValidator, v.validateWebRequest("/users/app/travels"), asyncHandler(app.getAppTravelDetail));
+router.get(
+  "/app/travels/:tripId/report.pdf",
+  withFlash,
+  app.requireWebAuth,
+  v.tripIdValidator,
+  v.validateWebRequest("/users/app/travels"),
+  asyncHandler(app.getAppTravelReportPdf)
+);
 router.post(
   "/app/travels/:tripId/stages",
   app.requireWebAuth,

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include("../partials/head", { title: "Gestione utenti" }) %>
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <%- include("../partials/navbar", { user }) %>
+
+  <main class="flex-grow-1 py-4 py-md-5">
+    <div class="container">
+      <%- include("../partials/flash") %>
+
+      <!-- Header area admin -->
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+          <h1 class="h3 mb-1">Gestione utenti</h1>
+          <p class="text-muted mb-0">Crea account con password temporanea e monitora lo stato cambio password.</p>
+        </div>
+      </div>
+
+      <!-- Form creazione utenza -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Nuova utenza</h2>
+          <form method="POST" action="/users/app/admin/users" class="row g-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" required />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label">Nome</label>
+              <input type="text" name="name" class="form-control" />
+            </div>
+            <div class="col-12 col-md-2">
+              <label class="form-label">Ruolo</label>
+              <select name="role" class="form-select">
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label">Password temporanea</label>
+              <input type="text" name="temporaryPassword" class="form-control" minlength="8" required />
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+              <button class="btn btn-dark" type="submit">Crea utente</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tabella utenti -->
+      <div class="card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Utenze esistenti</h2>
+          <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Nome</th>
+                  <th>Ruolo</th>
+                  <th>Stato account</th>
+                  <th>Cambio password</th>
+                  <th>Creato il</th>
+                  <th class="text-end">Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!users || users.length === 0) { %>
+                  <tr>
+                    <td colspan="7" class="text-muted">Nessun utente trovato.</td>
+                  </tr>
+                <% } %>
+                <% (users || []).forEach((u) => { %>
+                  <tr>
+                    <td><%= u.email %></td>
+                    <td><%= u.name || '-' %></td>
+                    <td><span class="badge text-bg-<%= u.role === 'admin' ? 'dark' : 'secondary' %>"><%= u.role %></span></td>
+                    <td>
+                      <% if (u.isBlocked) { %>
+                        <span class="badge text-bg-danger">Bloccato</span>
+                      <% } else { %>
+                        <span class="badge text-bg-success">Attivo</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (u.mustChangePassword) { %>
+                        <span class="badge text-bg-warning">Da aggiornare</span>
+                      <% } else { %>
+                        <span class="badge text-bg-success">Completato</span>
+                      <% } %>
+                    </td>
+                    <td><%= new Date(u.createdAt).toLocaleDateString('it-IT') %></td>
+                    <td class="text-end">
+                      <% if (String(user._id) !== String(u._id)) { %>
+                        <div class="d-inline-flex gap-1">
+                          <% if (u.isBlocked) { %>
+                            <form action="/users/app/admin/users/<%= u._id %>/unblock" method="POST" class="d-inline">
+                              <button class="btn btn-outline-success btn-sm" type="submit">Sblocca</button>
+                            </form>
+                          <% } else { %>
+                            <form action="/users/app/admin/users/<%= u._id %>/block" method="POST" class="d-inline">
+                              <button class="btn btn-outline-warning btn-sm" type="submit">Blocca</button>
+                            </form>
+                          <% } %>
+                          <form action="/users/app/admin/users/<%= u._id %>/delete" method="POST" class="d-inline" onsubmit="return confirm('Eliminare questa utenza?');">
+                            <button class="btn btn-outline-danger btn-sm" type="submit">Elimina</button>
+                          </form>
+                        </div>
+                      <% } else { %>
+                        <span class="text-muted small">Account corrente</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center text-muted py-3 small border-top mt-auto">
+    &copy; <%= new Date().getFullYear() %> Travel Trackr
+  </footer>
+</body>
+</html>

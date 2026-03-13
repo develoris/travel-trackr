@@ -47,6 +47,15 @@ const getDayNumberFromPayload = (payload = {}) => {
   return direct || existingDay || newDay || null;
 };
 
+const getNextDayNumber = (trip) => {
+  const maxDay = (trip.stages || []).reduce((max, stage) => {
+    const day = Number(stage.dayNumber || 0);
+    return day > max ? day : max;
+  }, 0);
+
+  return maxDay + 1;
+};
+
 const buildStartAtFromDayAndTime = (tripStartDate, dayNumber, startTime) => {
   if (!tripStartDate || !dayNumber || !startTime) {
     return null;
@@ -236,10 +245,12 @@ export const addStageToTrip = async (tripId, ownerId, payload) => {
   }
 
   const explicitDayNumber = getDayNumberFromPayload(payload);
+  const isNewDayMode = payload?.dayMode === "new";
+  const resolvedDayNumber = explicitDayNumber || (isNewDayMode ? getNextDayNumber(trip) : null);
   const preciseStartAt = normalizeDate(payload.startAt);
-  const inferredStartAt = buildStartAtFromDayAndTime(trip.startDate, explicitDayNumber, payload.startTime);
+  const inferredStartAt = buildStartAtFromDayAndTime(trip.startDate, resolvedDayNumber, payload.startTime);
   const startAt = preciseStartAt || inferredStartAt;
-  const dayNumber = explicitDayNumber || deriveDayNumber(trip.startDate, startAt);
+  const dayNumber = resolvedDayNumber || deriveDayNumber(trip.startDate, startAt);
   const sequence = getNextStageSequence(trip, dayNumber);
 
   trip.stages.push({

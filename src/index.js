@@ -12,18 +12,25 @@ import requestId from "./middlewares/request-id.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error-handler.js";
 import { connectDatabase, disconnectDatabase } from "./config/database.js";
 import { seedMockData } from "./scripts/seed-mock-data.js";
+import { startBackupCron } from "./scripts/backup-cron.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const isProduction = process.env.NODE_ENV === "production";
 let isShuttingDown = false;
+let stopBackupCron = null;
 
 const bootstrap = async () => {
   const { mongoUrl, isInMemory } = await connectDatabase();
 
   if (isInMemory) {
     await seedMockData();
+  }
+
+  if (!isInMemory && process.env.ENABLE_DB_BACKUP_CRON === "true") {
+    // Cron integrato nell'app: utile in ambienti semplici o dev-server persistenti.
+    stopBackupCron = startBackupCron();
   }
 
   app.use(cors({
@@ -34,6 +41,11 @@ const bootstrap = async () => {
   app.use(requestId);
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use((req, res, next) => {
+    // Utile per evidenziare la voce active in navbar/sidebar.
+    res.locals.currentPath = req.path;
+    next();
+  });
   app.use(
     session({
       name: "tt.sid",
@@ -76,6 +88,11 @@ const bootstrap = async () => {
     console.log(`[shutdown] Received ${signal}`);
 
     await new Promise((resolve) => server.close(resolve));
+
+    if (stopBackupCron) {
+      stopBackupCron();
+      stopBackupCron = null;
+    }
 
     try {
       await disconnectDatabase();

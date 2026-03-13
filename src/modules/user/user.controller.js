@@ -1,12 +1,10 @@
 import {
-  createUser,
   deleteUserById,
   getUserById,
   listUsers,
   loginUser,
   logoutUserSession,
   refreshUserTokens,
-  registerUser,
   updateUserById
 } from "./user.service.js";
 import { AppError } from "../../core/errors/app-error.js";
@@ -32,26 +30,20 @@ export const getUser = async (req, res) => {
 };
 
 export const postUser = async (req, res) => {
-  const user = await createUser(req.body);
-  return res.status(201).json(user);
+  throw new AppError({
+    code: "REGISTRATION_DISABLED",
+    status: 403,
+    userMessage: "Creazione utenti disponibile solo in area admin.",
+    developerMessage: "Public user creation is disabled"
+  });
 };
 
 export const signIn = async (req, res) => {
-  const { email, password, name } = req.body;
-  const user = await registerUser({ email, password, name });
-
-  if (!user) {
-    throw new AppError({
-      code: "EMAIL_ALREADY_REGISTERED",
-      status: 409,
-      userMessage: "Email gia registrata.",
-      developerMessage: `Email ${email} already exists`
-    });
-  }
-
-  return res.status(201).json({
-    message: "Registrazione completata. Esegui il login per ottenere i token.",
-    user
+  throw new AppError({
+    code: "REGISTRATION_DISABLED",
+    status: 403,
+    userMessage: "Registrazione disabilitata: contatta un amministratore.",
+    developerMessage: "Self registration endpoint disabled"
   });
 };
 
@@ -79,6 +71,15 @@ const clearRefreshTokenCookie = (res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   const result = await loginUser({ email, password });
+
+  if (result?.reason === "USER_BLOCKED") {
+    throw new AppError({
+      code: "USER_BLOCKED",
+      status: 403,
+      userMessage: "Utenza bloccata. Contatta un amministratore.",
+      developerMessage: `Blocked account login attempt for ${email}`
+    });
+  }
 
   if (!result) {
     throw new AppError({

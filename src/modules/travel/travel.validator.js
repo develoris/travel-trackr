@@ -82,9 +82,21 @@ export const appAddStageValidator = [
   body("newDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Nuova tappa non valida"),
   body("startTime").optional({ values: "falsy" }).matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage("Orario non valido"),
   body().custom((_, { req }) => {
-    const hasDayNumber = Boolean(req.body.dayNumber || req.body.existingDayNumber || req.body.newDayNumber);
+    const mode = req.body.dayMode;
+    const hasAnyDayNumber = Boolean(req.body.dayNumber || req.body.existingDayNumber || req.body.newDayNumber);
 
-    if (!hasDayNumber) {
+    // Se l'utente sceglie tappa esistente, il numero deve essere specificato.
+    if (mode === "existing" && !(req.body.existingDayNumber || req.body.dayNumber)) {
+      throw new Error("Seleziona una tappa esistente");
+    }
+
+    // Se l'utente sceglie nuova tappa, il numero puo essere vuoto:
+    // verra assegnata automaticamente la prossima tappa disponibile.
+    if (mode === "new") {
+      return true;
+    }
+
+    if (!hasAnyDayNumber) {
       throw new Error("Seleziona una tappa esistente o crea una nuova tappa");
     }
 

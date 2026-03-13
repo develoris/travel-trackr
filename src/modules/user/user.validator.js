@@ -76,6 +76,55 @@ export const appRegisterValidator = [
     .withMessage("Il nome deve essere una stringa")
 ];
 
+export const appAdminCreateUserValidator = [
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email obbligatoria")
+    .bail()
+    .isEmail()
+    .withMessage("Email non valida")
+    .normalizeEmail(),
+  body("name")
+    .optional({ values: "falsy" })
+    .trim()
+    .isString()
+    .withMessage("Il nome deve essere una stringa"),
+  body("role")
+    .optional({ values: "falsy" })
+    .isIn(["user", "admin"])
+    .withMessage("Ruolo non valido"),
+  body("temporaryPassword")
+    .isString()
+    .withMessage("Password temporanea obbligatoria")
+    .bail()
+    .isLength({ min: 8 })
+    .withMessage("La password temporanea deve avere almeno 8 caratteri")
+];
+
+export const appProfilePasswordValidator = [
+  body("currentPassword")
+    .optional({ values: "falsy" })
+    .isString()
+    .withMessage("Password corrente non valida"),
+  body("newPassword")
+    .isString()
+    .withMessage("Nuova password obbligatoria")
+    .bail()
+    .isLength({ min: 8 })
+    .withMessage("La nuova password deve avere almeno 8 caratteri"),
+  body("confirmPassword")
+    .isString()
+    .withMessage("Conferma password obbligatoria")
+    .bail()
+    .custom((value, { req }) => value === req.body.newPassword)
+    .withMessage("Le password non coincidono")
+];
+
+export const appAdminUserActionValidator = [
+  param("id").isMongoId().withMessage("Utente non valido")
+];
+
 export const refreshSessionValidator = [];
 
 export const logoutValidator = [];

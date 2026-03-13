@@ -18,6 +18,8 @@
           <p class="text-muted mb-0"><%= trip.locationSummary || 'Localita da definire' %></p>
         </div>
         <div class="d-flex gap-2">
+          <!-- Export rapido del report condivisibile -->
+          <a class="btn btn-dark btn-sm" href="/users/app/travels/<%= trip._id %>/report.pdf">Scarica PDF</a>
           <button class="btn btn-outline-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#editTripPanel" aria-expanded="false">Modifica viaggio</button>
           <form action="/users/app/travels/<%= trip._id %>/delete" method="POST" onsubmit="return confirm('Eliminare il viaggio?');">
             <button class="btn btn-outline-danger btn-sm" type="submit">Elimina</button>

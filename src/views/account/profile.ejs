@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <%- include("../partials/head", { title: "Mio profilo" }) %>
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <%- include("../partials/navbar", { user }) %>
+
+  <main class="flex-grow-1 py-4 py-md-5">
+    <div class="container">
+      <%- include("../partials/flash") %>
+
+      <% const currentPath = typeof currentPath !== 'undefined' ? currentPath : ''; %>
+
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+          <h1 class="h3 mb-1">Mio profilo</h1>
+          <p class="text-muted mb-0"><%= user.email %> · ruolo <strong><%= user.role %></strong></p>
+        </div>
+      </div>
+
+      <% if (user.mustChangePassword) { %>
+        <div class="alert alert-warning" role="alert">
+          <strong>Primo accesso:</strong> devi impostare una nuova password per continuare a usare la piattaforma.
+        </div>
+      <% } %>
+
+      <div class="row g-4">
+        <!-- Sidebar menu utente: pronto per future sezioni -->
+        <div class="col-12 col-lg-3">
+          <div class="card">
+            <div class="card-header">Menu account</div>
+            <div class="list-group list-group-flush">
+              <a href="/users/app/profile" class="list-group-item list-group-item-action <%= currentPath === '/users/app/profile' ? 'active' : '' %>">
+                <i class="bi bi-key me-2"></i>Cambia password
+              </a>
+              <span class="list-group-item text-muted">
+                <i class="bi bi-shield-check me-2"></i>Preferenze (prossimamente)
+              </span>
+              <span class="list-group-item text-muted">
+                <i class="bi bi-bell me-2"></i>Notifiche (prossimamente)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-9">
+          <!-- Form cambio password -->
+          <div class="card">
+            <div class="card-body">
+              <h2 class="h5 mb-3">Cambio password</h2>
+              <form method="POST" action="/users/app/profile/password" class="row g-3">
+                <% if (!user.mustChangePassword) { %>
+                  <div class="col-12">
+                    <label class="form-label">Password corrente</label>
+                    <input type="password" name="currentPassword" class="form-control" required />
+                  </div>
+                <% } %>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Nuova password</label>
+                  <input type="password" name="newPassword" class="form-control" minlength="8" required />
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Conferma nuova password</label>
+                  <input type="password" name="confirmPassword" class="form-control" minlength="8" required />
+                </div>
+                <div class="col-12 d-flex justify-content-end">
+                  <button type="submit" class="btn btn-dark">Aggiorna password</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center text-muted py-3 small border-top mt-auto">
+    &copy; <%= new Date().getFullYear() %> Travel Trackr
+  </footer>
+</body>
+</html>

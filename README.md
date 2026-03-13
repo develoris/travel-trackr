@@ -1,6 +1,6 @@
 # Travel Trackr
 
-Applicazione Node.js con interfaccia EJS e API JSON per gestire utenti (modulo travel in arrivo).
+Applicazione Node.js con interfaccia EJS e API JSON per gestione viaggi, utenti e amministrazione account.
 
 ## Stato attuale
 
@@ -9,7 +9,12 @@ Applicazione Node.js con interfaccia EJS e API JSON per gestire utenti (modulo t
 - Login API con JWT access token e refresh token in cookie HttpOnly
 - Pagina iniziale web su `/users/app`
 
-Per una spiegazione più tecnica, leggi [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) e [docs/ERROR_HANDLING.md](docs/ERROR_HANDLING.md).
+Per una spiegazione piu tecnica, leggi:
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/ERROR_HANDLING.md](docs/ERROR_HANDLING.md)
+- [docs/USER_ACCESS_AND_ADMIN.md](docs/USER_ACCESS_AND_ADMIN.md)
+- [docs/BACKUP_AND_RESTORE.md](docs/BACKUP_AND_RESTORE.md)
 
 ## Stack
 
@@ -44,6 +49,15 @@ Per disattivare il seed automatico imposta `SEED_MOCK_DATA=false`.
 
 Server locale: http://localhost:3000
 
+## Operativita rapida (nuovo manutentore)
+
+Se stai prendendo in mano il progetto adesso:
+
+1. Parti da [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+2. Leggi policy utenti in [docs/USER_ACCESS_AND_ADMIN.md](docs/USER_ACCESS_AND_ADMIN.md).
+3. Verifica backup in [docs/BACKUP_AND_RESTORE.md](docs/BACKUP_AND_RESTORE.md).
+4. Controlla gestione errori in [docs/ERROR_HANDLING.md](docs/ERROR_HANDLING.md).
+
 ## Variabili ambiente
 
 | Variabile | Descrizione | Default |
@@ -59,6 +73,20 @@ Server locale: http://localhost:3000
 | CORS_ORIGIN | Origin frontend consentita | http://localhost:5173 |
 | USE_IN_MEMORY_DB | Se true usa mongodb-memory-server | false |
 | SEED_MOCK_DATA | Se true crea utenti demo in start:mock | true |
+| ENABLE_DB_BACKUP_CRON | Se true attiva cron backup in-process | false |
+| DB_BACKUP_CRON | Espressione cron backup | 0 3 * * * |
+| DB_BACKUP_RUN_ON_STARTUP | Esegue backup subito all'avvio cron | false |
+| BACKUP_OUTPUT_DIR | Cartella output backup | ./backups |
+| BACKUP_DB_NAME | Nome db da esportare | travel-trackr |
+
+## Backup database
+
+Comandi principali:
+
+- `npm run backup:db` -> backup one-shot.
+- `npm run backup:cron` -> worker cron standalone.
+
+Approfondimento: [docs/BACKUP_AND_RESTORE.md](docs/BACKUP_AND_RESTORE.md).
 
 ## URL principali
 
@@ -69,6 +97,13 @@ Server locale: http://localhost:3000
 - POST /users/app/login
 - GET /users/app/register
 - POST /users/app/register
+- GET /users/app/profile
+- POST /users/app/profile/password
+- GET /users/app/admin/users
+- POST /users/app/admin/users
+- POST /users/app/admin/users/:id/block
+- POST /users/app/admin/users/:id/unblock
+- POST /users/app/admin/users/:id/delete
 - POST /users/app/logout
 - GET /users/app/travels
 - GET /users/app/travels/new
@@ -82,16 +117,25 @@ Server locale: http://localhost:3000
 
 - GET /users
 - GET /users/:id
-- POST /users
+- POST /users (disabilitato per policy: admin-only)
 - PATCH /users/:id
 - DELETE /users/:id
 
 ### API auth
 
-- POST /users/signin
+- POST /users/signin (disabilitato per policy: admin-only)
 - POST /users/login
 - POST /users/refresh
 - POST /users/logout
+
+## Policy utenti (importante)
+
+- Registrazione self-service disabilitata.
+- Gli utenti vengono creati da admin con password temporanea.
+- Al primo login l'utente deve cambiare password.
+- Admin puo bloccare/sbloccare/eliminare utenze.
+
+Dettaglio completo: [docs/USER_ACCESS_AND_ADMIN.md](docs/USER_ACCESS_AND_ADMIN.md).
 
 ### API travels (JWT Bearer)
 

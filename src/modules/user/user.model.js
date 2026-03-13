@@ -9,6 +9,9 @@ const UserSchema = new Schema(
     passwordHash: { type: String, required: true },
     role: { type: String, enum: ["user", "admin"], default: "user" },
     name: { type: String, trim: true },
+    mustChangePassword: { type: Boolean, default: false },
+    temporaryPasswordIssuedAt: { type: Date, default: null },
+    isBlocked: { type: Boolean, default: false },
     auth: {
       accessTokenHash: { type: String, default: null },
       refreshTokenHash: { type: String, default: null },
