@@ -98,7 +98,7 @@ export const postExpense = async (req, res) => {
     throw new AppError({
       code: "STAGE_NOT_FOUND",
       status: 404,
-      userMessage: "Tappa non trovata."
+      userMessage: "Attivita non trovata."
     });
   }
 

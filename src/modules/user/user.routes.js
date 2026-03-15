@@ -7,7 +7,7 @@ import { asyncHandler } from "../../core/errors/error-utils.js";
 const router = Router();
 
 // EJS routes
-router.get("/app", web.withFlash, web.requireWebAuth, asyncHandler(web.getAppHome));
+router.get("/app", web.withFlash, web.requireWebAuth, web.requirePasswordUpdate, asyncHandler(web.getAppHome));
 router.get("/app/login", web.withFlash, web.redirectIfAuthenticated, asyncHandler(web.getAppLogin));
 router.post(
 	"/app/login",
@@ -23,6 +23,63 @@ router.post(
 	v.appRegisterValidator,
 	v.validateWebRequest("/users/app/register"),
 	asyncHandler(web.postAppRegister)
+);
+router.get(
+	"/app/profile",
+	web.withFlash,
+	web.requireWebAuth,
+	asyncHandler(web.getAppProfile)
+);
+router.post(
+	"/app/profile/password",
+	web.requireWebAuth,
+	v.appProfilePasswordValidator,
+	v.validateWebRequest("/users/app/profile"),
+	asyncHandler(web.postAppProfilePassword)
+);
+router.get(
+	"/app/admin/users",
+	web.withFlash,
+	web.requireWebAuth,
+	web.requirePasswordUpdate,
+	web.requireAdminWeb,
+	asyncHandler(web.getAppAdminUsers)
+);
+router.post(
+	"/app/admin/users",
+	web.requireWebAuth,
+	web.requirePasswordUpdate,
+	web.requireAdminWeb,
+	v.appAdminCreateUserValidator,
+	v.validateWebRequest("/users/app/admin/users"),
+	asyncHandler(web.postAppAdminCreateUser)
+);
+router.post(
+	"/app/admin/users/:id/block",
+	web.requireWebAuth,
+	web.requirePasswordUpdate,
+	web.requireAdminWeb,
+	v.appAdminUserActionValidator,
+	v.validateWebRequest("/users/app/admin/users"),
+	asyncHandler(web.postAppAdminBlockUser)
+);
+router.post(
+	"/app/admin/users/:id/unblock",
+	web.requireWebAuth,
+	web.requirePasswordUpdate,
+	web.requireAdminWeb,
+	v.appAdminUserActionValidator,
+	v.validateWebRequest("/users/app/admin/users"),
+	asyncHandler(web.postAppAdminUnblockUser)
+);
+router.post(
+	"/app/admin/users/:id/delete",
+	web.requireWebAuth,
+	web.requirePasswordUpdate,
+	web.requireAdminWeb,
+	v.appAdminUserActionValidator,
+	v.validateWebRequest("/users/app/admin/users"),
+	asyncHandler(web.postAppAdminDeleteUser)
 );
 router.post("/app/logout", asyncHandler(web.postAppLogout));
 

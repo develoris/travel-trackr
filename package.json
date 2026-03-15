@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node src/index.js",
     "start:mock": "node src/scripts/start-mock.js",
+    "backup:db": "node src/scripts/backup-db.js",
+    "backup:cron": "node src/scripts/backup-cron.js",
+    "openapi:export-json": "node src/scripts/export-openapi-json.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -22,8 +25,13 @@
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "express-validator": "^7.3.1",
+    "js-yaml": "^4.1.1",
     "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.0",
     "mongodb-memory-server": "^10.4.3",
-    "mongoose": "^9.3.0"
+    "mongoose": "^9.3.0",
+    "node-cron": "^4.2.1",
+    "pdfkit": "^0.17.2",
+    "swagger-ui-express": "^5.0.1"
   }
 }

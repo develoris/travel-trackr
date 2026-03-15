@@ -62,14 +62,8 @@ export const createUser = async (payload) => {
 };
 
 export const registerUser = async ({ email, password, name }) => {
-  const existingUser = await getUserByEmail(email);
-
-  if (existingUser) {
-    return null;
-  }
-
-  // La password in chiaro viene hashata dal pre-save hook nel model.
-  return createUser({ email, passwordHash: password, name });
+  // La registrazione self-service e disabilitata: gli utenti vengono creati da admin.
+  return null;
 };
 
 export const loginUser = async ({ email, password }) => {
@@ -79,6 +73,10 @@ export const loginUser = async ({ email, password }) => {
     return null;
   }
 
+  if (user.isBlocked) {
+    return { user: null, tokens: null, reason: "USER_BLOCKED" };
+  }
+
   const isPasswordValid = await user.verifyPassword(password);
 
   if (!isPasswordValid) {
@@ -86,7 +84,7 @@ export const loginUser = async ({ email, password }) => {
   }
 
   const tokens = await issueTokensForUser(user);
-  return { user, tokens };
+  return { user, tokens, reason: null };
 };
 
 export const refreshUserTokens = async (refreshToken) => {
@@ -154,3 +152,74 @@ export const updateUserById = (id, payload) =>
   });
 
 export const deleteUserById = (id) => User.findByIdAndDelete(id);
+
+export const createUserByAdmin = async ({ email, name, role = "user", temporaryPassword }) => {
+  const existingUser = await getUserByEmail(email);
+
+  if (existingUser) {
+    return null;
+  }
+
+  return createUser({
+    email,
+    name,
+    role,
+    passwordHash: temporaryPassword,
+    mustChangePassword: true,
+    temporaryPasswordIssuedAt: new Date()
+  });
+};
+
+export const updateUserPassword = async ({ userId, currentPassword, newPassword, requireCurrent = true }) => {
+  const user = await getUserById(userId);
+
+  if (!user) {
+    return { user: null, reason: "USER_NOT_FOUND" };
+  }
+
+  if (requireCurrent) {
+    const isValidCurrent = await user.verifyPassword(currentPassword || "");
+
+    if (!isValidCurrent) {
+      return { user: null, reason: "INVALID_CURRENT_PASSWORD" };
+    }
+  }
+
+  user.passwordHash = newPassword;
+  user.mustChangePassword = false;
+  user.temporaryPasswordIssuedAt = null;
+  await user.save();
+
+  return { user, reason: null };
+};
+
+export const setUserBlockedByAdmin = async ({ userId, blocked, requesterId }) => {
+  if (String(userId) === String(requesterId)) {
+    return { user: null, reason: "SELF_ACTION_NOT_ALLOWED" };
+  }
+
+  const user = await getUserById(userId);
+
+  if (!user) {
+    return { user: null, reason: "USER_NOT_FOUND" };
+  }
+
+  user.isBlocked = Boolean(blocked);
+  await user.save();
+
+  return { user, reason: null };
+};
+
+export const deleteUserByAdmin = async ({ userId, requesterId }) => {
+  if (String(userId) === String(requesterId)) {
+    return { deleted: null, reason: "SELF_ACTION_NOT_ALLOWED" };
+  }
+
+  const deleted = await deleteUserById(userId);
+
+  if (!deleted) {
+    return { deleted: null, reason: "USER_NOT_FOUND" };
+  }
+
+  return { deleted, reason: null };
+};

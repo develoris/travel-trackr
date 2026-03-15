@@ -11,6 +11,53 @@ const toNumberOrNull = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const toStringOrNull = (value) => {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  const normalized = String(value).trim();
+  return normalized ? normalized : null;
+};
+
+const pickTechnicalValue = (payload = {}, key) => {
+  if (payload.technical && payload.technical[key] !== undefined) {
+    return payload.technical[key];
+  }
+
+  const dottedKey = `technical.${key}`;
+  return payload[dottedKey];
+};
+
+const parseTechnicalPayload = (payload = {}) => {
+  const distanceKm = toNumberOrNull(pickTechnicalValue(payload, "distanceKm"));
+  const elevationGainM = toNumberOrNull(pickTechnicalValue(payload, "elevationGainM"));
+  const movingTimeMin = toNumberOrNull(pickTechnicalValue(payload, "movingTimeMin"));
+  const difficulty = toStringOrNull(pickTechnicalValue(payload, "difficulty"));
+  const terrain = toStringOrNull(pickTechnicalValue(payload, "terrain"));
+  const gpxUrl = toStringOrNull(pickTechnicalValue(payload, "gpxUrl"));
+
+  if (
+    distanceKm === null &&
+    elevationGainM === null &&
+    movingTimeMin === null &&
+    !difficulty &&
+    !terrain &&
+    !gpxUrl
+  ) {
+    return null;
+  }
+
+  return {
+    distanceKm,
+    elevationGainM,
+    movingTimeMin,
+    difficulty,
+    terrain,
+    gpxUrl
+  };
+};
+
 const startOfDay = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -45,6 +92,15 @@ const getDayNumberFromPayload = (payload = {}) => {
   const newDay = toNumberOrNull(payload.newDayNumber);
 
   return direct || existingDay || newDay || null;
+};
+
+const getNextDayNumber = (trip) => {
+  const maxDay = (trip.stages || []).reduce((max, stage) => {
+    const day = Number(stage.dayNumber || 0);
+    return day > max ? day : max;
+  }, 0);
+
+  return maxDay + 1;
 };
 
 const buildStartAtFromDayAndTime = (tripStartDate, dayNumber, startTime) => {
@@ -236,10 +292,12 @@ export const addStageToTrip = async (tripId, ownerId, payload) => {
   }
 
   const explicitDayNumber = getDayNumberFromPayload(payload);
+  const isNewDayMode = payload?.dayMode === "new";
+  const resolvedDayNumber = explicitDayNumber || (isNewDayMode ? getNextDayNumber(trip) : null);
   const preciseStartAt = normalizeDate(payload.startAt);
-  const inferredStartAt = buildStartAtFromDayAndTime(trip.startDate, explicitDayNumber, payload.startTime);
+  const inferredStartAt = buildStartAtFromDayAndTime(trip.startDate, resolvedDayNumber, payload.startTime);
   const startAt = preciseStartAt || inferredStartAt;
-  const dayNumber = explicitDayNumber || deriveDayNumber(trip.startDate, startAt);
+  const dayNumber = resolvedDayNumber || deriveDayNumber(trip.startDate, startAt);
   const sequence = getNextStageSequence(trip, dayNumber);
 
   trip.stages.push({
@@ -254,6 +312,7 @@ export const addStageToTrip = async (tripId, ownerId, payload) => {
     parentStageId: payload.parentStageId || null,
     media: payload.media || [],
     notes: payload.notes,
+    technical: parseTechnicalPayload(payload) || undefined,
     expenses: []
   });
 
@@ -318,6 +377,19 @@ export const updateStageInTrip = async (tripId, stageId, ownerId, payload) => {
 
   if (payload.endAt !== undefined) {
     stage.endAt = normalizeDate(payload.endAt);
+  }
+
+  const hasTechnicalPayload = [
+    "distanceKm",
+    "elevationGainM",
+    "movingTimeMin",
+    "difficulty",
+    "terrain",
+    "gpxUrl"
+  ].some((key) => pickTechnicalValue(payload, key) !== undefined);
+
+  if (hasTechnicalPayload) {
+    stage.technical = parseTechnicalPayload(payload) || undefined;
   }
 
   if (!stage.dayNumber && stage.startAt) {

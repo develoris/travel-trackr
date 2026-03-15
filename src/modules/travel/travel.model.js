@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const { Schema, model, Types } = mongoose;
 
+// Normalizza una data a mezzanotte (00:00:00) per confronti "solo giorno".
 const startOfDay = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -12,6 +13,10 @@ const startOfDay = (value) => {
   return date;
 };
 
+// Calcola il numero di giorno dell'attività rispetto alla data di inizio del viaggio.
+// Es: viaggio inizia il 10/06, attività il 12/06 → Giorno 3.
+// Se l'attività precede l'inizio del viaggio, ritorna 1 (fallback sicuro).
+// Usato principalmente nel virtual "stats" per contare i giorni distinti.
 const inferDayNumber = (tripStartDate, stageStartAt) => {
   if (!tripStartDate || !stageStartAt) {
     return null;
@@ -30,6 +35,7 @@ const inferDayNumber = (tripStartDate, stageStartAt) => {
   return diff >= 0 ? diff + 1 : 1;
 };
 
+// Schema per una singola voce di spesa associata a un'attività.
 const ExpenseSchema = new Schema(
   {
     title: { type: String, required: true, trim: true, maxlength: 120 },
@@ -46,6 +52,30 @@ const ExpenseSchema = new Schema(
   { _id: true, timestamps: true }
 );
 
+// Dati tecnici opzionali per attività outdoor (trekking, bikepack, ecc.).
+// Tutti i campi sono facoltativi: se assenti l'attività funziona normalmente.
+const StageTechnicalSchema = new Schema(
+  {
+    distanceKm: { type: Number, min: 0, default: null },
+    elevationGainM: { type: Number, min: 0, default: null },
+    movingTimeMin: { type: Number, min: 0, default: null },
+    difficulty: {
+      type: String,
+      enum: ["facile", "media", "impegnativa", "esperto"],
+      default: null
+    },
+    terrain: {
+      type: String,
+      enum: ["asfalto", "sterrato", "sentiero", "misto"],
+      default: null
+    },
+    gpxUrl: { type: String, trim: true, maxlength: 500, default: null }
+  },
+  { _id: false }
+);
+
+// Schema per una singola attività ("stage") del viaggio.
+// dayNumber e sequence determinano l'ordine nella timeline per giorno.
 const StageSchema = new Schema(
   {
     title: { type: String, required: true, trim: true, maxlength: 120 },
@@ -65,6 +95,7 @@ const StageSchema = new Schema(
     parentStageId: { type: Schema.Types.ObjectId, default: null },
     media: [{ type: String, trim: true, maxlength: 500 }],
     notes: { type: String, trim: true, maxlength: 1000 },
+    technical: { type: StageTechnicalSchema, default: () => ({}) },
     expenses: [ExpenseSchema]
   },
   { _id: true, timestamps: true }
@@ -95,6 +126,8 @@ const TripSchema = new Schema(
   { timestamps: true }
 );
 
+// Se endDate non viene fornita, la imposta uguale a startDate (viaggio di un giorno).
+// Aggiorna anche il flag isMultiDay per query/filtri rapidi.
 TripSchema.pre("validate", function preValidate() {
   if (!this.endDate) {
     this.endDate = this.startDate;
@@ -103,6 +136,8 @@ TripSchema.pre("validate", function preValidate() {
   this.isMultiDay = Boolean(this.startDate && this.endDate && this.endDate > this.startDate);
 });
 
+// Virtual calcolato al volo: non viene salvato su DB.
+// Aggrega conteggi e spesa totale utili per dashboard e PDF report.
 TripSchema.virtual("stats").get(function getStats() {
   let totalSpent = 0;
   let expensesCount = 0;
@@ -136,6 +171,8 @@ TripSchema.set("toJSON", {
   virtuals: true
 });
 
+// Helper per trovare un'attività embedded per id senza query aggiuntive.
+// Usato nel service per update/delete di attività e spese.
 TripSchema.methods.findStageById = function findStageById(stageId) {
   if (!stageId) {
     return null;

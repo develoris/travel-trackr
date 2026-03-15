@@ -1,28 +1,25 @@
 <!-- Modal per creazione nuova attivita -->
+<% const activityTypeLabels = { trek: 'Trek', visita: 'Visita', trasferimento: 'Trasferimento', food: 'Cibo', relax: 'Relax', outdoor: 'Outdoor', altro: 'Altro' }; %>
 <div class="modal fade" id="newActivityModal" tabindex="-1" aria-labelledby="newActivityModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="newActivityModalLabel">Nuova attivita</h5>
+        <h5 class="modal-title" id="newActivityModalLabel">Nuova attività</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="text-muted small">Scegli una tappa esistente o creane una nuova. L'ordine e automatico in base all'ora di inizio.</p>
+        <p class="text-muted small">Scegli un giorno esistente o creane uno nuovo. L'ordine è automatico in base all'orario di inizio.</p>
         <form action="/users/app/travels/<%= trip._id %>/stages" method="POST" id="newActivityForm" class="row g-3">
           <div class="col-12 col-md-8">
-            <label class="form-label small text-muted mb-1">Titolo attivita</label>
+            <label class="form-label small text-muted mb-1">Titolo attività</label>
             <input class="form-control" name="title" required />
           </div>
           <div class="col-12 col-md-4">
-            <label class="form-label small text-muted mb-1">Tipo attivita</label>
+            <label class="form-label small text-muted mb-1">Tipo attività</label>
             <select class="form-select" name="activityType">
-              <option value="trek">Trek</option>
-              <option value="visita">Visita</option>
-              <option value="trasferimento">Trasferimento</option>
-              <option value="food">Food</option>
-              <option value="relax">Relax</option>
-              <option value="outdoor">Outdoor</option>
-              <option value="altro">Altro</option>
+              <% ['trek','visita','trasferimento','food','relax','outdoor','altro'].forEach((type) => { %>
+                <option value="<%= type %>"><%= activityTypeLabels[type] || type %></option>
+              <% }) %>
             </select>
           </div>
           <div class="col-12">
@@ -30,26 +27,27 @@
             <div class="d-flex gap-4">
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="dayMode" id="modalDayModeExisting" value="existing" <%= (dayOptions && dayOptions.length > 0) ? 'checked' : '' %> />
-                <label class="form-check-label" for="modalDayModeExisting">Tappa esistente</label>
+                <label class="form-check-label" for="modalDayModeExisting">Giorno esistente</label>
               </div>
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="dayMode" id="modalDayModeNew" value="new" <%= (!dayOptions || dayOptions.length === 0) ? 'checked' : '' %> />
-                <label class="form-check-label" for="modalDayModeNew">Nuova tappa</label>
+                <label class="form-check-label" for="modalDayModeNew">Nuovo giorno</label>
               </div>
             </div>
           </div>
           <div class="col-12 col-md-6" id="modalExistingDayWrap">
-            <label class="form-label small text-muted mb-1">Tappa esistente</label>
+            <label class="form-label small text-muted mb-1">Giorno esistente</label>
             <select class="form-select" name="existingDayNumber">
-              <option value="">Seleziona tappa</option>
+              <option value="">Seleziona giorno</option>
               <% (dayOptions || []).forEach((dayNumber) => { %>
-                <option value="<%= dayNumber %>">Tappa <%= dayNumber %></option>
+                <option value="<%= dayNumber %>">Giorno <%= dayNumber %></option>
               <% }) %>
             </select>
           </div>
           <div class="col-12 col-md-6" id="modalNewDayWrap">
-            <label class="form-label small text-muted mb-1">Numero nuova tappa</label>
+            <label class="form-label small text-muted mb-1">Numero nuovo giorno</label>
             <input class="form-control" type="number" min="1" step="1" name="newDayNumber" placeholder="Es. 3" />
+            <div class="form-text">Se lo lasci vuoto, viene creato automaticamente il prossimo giorno disponibile.</div>
           </div>
           <div class="col-12 col-md-6">
             <label class="form-label small text-muted mb-1">Orario inizio (opzionale)</label>
@@ -63,11 +61,51 @@
             <label class="form-label small text-muted mb-1">Descrizione</label>
             <textarea class="form-control" name="description" rows="3"></textarea>
           </div>
+          <div class="col-12">
+            <hr class="my-1" />
+            <p class="small text-muted mb-0">Dati tecnici (opzionali)</p>
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label small text-muted mb-1">Distanza (km)</label>
+            <input class="form-control" type="number" min="0" step="0.1" name="technical[distanceKm]" placeholder="Es. 18.4" />
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label small text-muted mb-1">Dislivello + (m)</label>
+            <input class="form-control" type="number" min="0" step="1" name="technical[elevationGainM]" placeholder="Es. 950" />
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label small text-muted mb-1">Tempo in movimento (min)</label>
+            <input class="form-control" type="number" min="0" step="1" name="technical[movingTimeMin]" placeholder="Es. 320" />
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label small text-muted mb-1">Difficoltà</label>
+            <select class="form-select" name="technical[difficulty]">
+              <option value="">Non specificata</option>
+              <option value="facile">Facile</option>
+              <option value="media">Media</option>
+              <option value="impegnativa">Impegnativa</option>
+              <option value="esperto">Esperto</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label small text-muted mb-1">Terreno</label>
+            <select class="form-select" name="technical[terrain]">
+              <option value="">Non specificato</option>
+              <option value="asfalto">Asfalto</option>
+              <option value="sterrato">Sterrato</option>
+              <option value="sentiero">Sentiero</option>
+              <option value="misto">Misto</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label small text-muted mb-1">Link GPX</label>
+            <input class="form-control" type="url" name="technical[gpxUrl]" placeholder="https://..." />
+          </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-        <button type="submit" form="newActivityForm" class="btn btn-dark">Aggiungi attivita</button>
+        <button type="submit" form="newActivityForm" class="btn btn-dark">Aggiungi attività</button>
       </div>
     </div>
   </div>

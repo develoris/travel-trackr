@@ -1,0 +1,496 @@
+openapi: 3.0.3
+info:
+  title: Travel Trackr REST API
+  version: 1.1.0
+  description: |
+    Documentazione API REST di Travel Trackr.
+    Nota: include solo endpoint JSON sotto prefisso /users, non endpoint EJS /users/app.
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Auth
+  - name: Users
+  - name: Travels
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              nullable: true
+        requestId:
+          type: string
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        accessToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [user, admin]
+        name:
+          type: string
+          nullable: true
+        mustChangePassword:
+          type: boolean
+        isBlocked:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Trip:
+      type: object
+      properties:
+        _id:
+          type: string
+        owner:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        category:
+          type: string
+        status:
+          type: string
+          enum: [planned, ongoing, completed, cancelled]
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        locationSummary:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        stages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stage'
+    Stage:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        activityType:
+          type: string
+        dayNumber:
+          type: integer
+          minimum: 1
+          nullable: true
+        sequence:
+          type: integer
+          minimum: 1
+        startAt:
+          type: string
+          format: date-time
+          nullable: true
+        endAt:
+          type: string
+          format: date-time
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Expense'
+    Expense:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+          example: EUR
+        category:
+          type: string
+        paidAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          nullable: true
+
+paths:
+  /users/login:
+    post:
+      tags: [Auth]
+      summary: Login API
+      description: Restituisce access token JWT e imposta refresh token in cookie HttpOnly.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login effettuato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenziali non valide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Utenza bloccata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      description: Richiede cookie refresh token valido.
+      responses:
+        '200':
+          description: Token aggiornato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+        '401':
+          description: Refresh token mancante/non valido/scaduto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/logout:
+    post:
+      tags: [Auth]
+      summary: Logout API
+      description: Revoca sessione server-side e pulisce refresh cookie.
+      responses:
+        '204':
+          description: Logout completato
+
+  /users/signin:
+    post:
+      tags: [Auth]
+      summary: Registrazione API (disabilitata)
+      description: Endpoint mantenuto per retrocompatibilita, ma attualmente disabilitato.
+      responses:
+        '403':
+          description: Registrazione disabilitata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users:
+    get:
+      tags: [Users]
+      summary: Lista utenti
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Elenco utenti
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      tags: [Users]
+      summary: Creazione utente API (disabilitata)
+      description: Endpoint disabilitato per policy admin-only via web app.
+      responses:
+        '403':
+          description: Creazione disabilitata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{id}:
+    get:
+      tags: [Users]
+      summary: Dettaglio utente
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Utente trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Utente non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags: [Users]
+      summary: Aggiorna utente
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Utente aggiornato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags: [Users]
+      summary: Elimina utente
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Utente eliminato
+
+  /users/travels:
+    get:
+      tags: [Travels]
+      summary: Lista viaggi utente autenticato
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Elenco viaggi
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trip'
+    post:
+      tags: [Travels]
+      summary: Crea nuovo viaggio
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, startDate]
+      responses:
+        '201':
+          description: Viaggio creato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+
+  /users/travels/{tripId}:
+    get:
+      tags: [Travels]
+      summary: Dettaglio viaggio
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: tripId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Viaggio trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Viaggio non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags: [Travels]
+      summary: Aggiorna viaggio
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: tripId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Viaggio aggiornato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+    delete:
+      tags: [Travels]
+      summary: Elimina viaggio
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: tripId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Viaggio eliminato
+
+  /users/travels/{tripId}/stages:
+    post:
+      tags: [Travels]
+      summary: Aggiunge attivita (stage) al viaggio
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: tripId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+      responses:
+        '201':
+          description: Attivita creata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stage'
+
+  /users/travels/{tripId}/stages/{stageId}/expenses:
+    post:
+      tags: [Travels]
+      summary: Aggiunge spesa a un'attivita
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: tripId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: stageId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, amount]
+      responses:
+        '201':
+          description: Spesa creata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
