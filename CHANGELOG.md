@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/develoris/travel-trackr/compare/travel-trackr-v1.2.0...travel-trackr-v1.3.0) (2026-03-15)
+
+
+### Features
+
+* **gihub:** auto approve release pr ([78b4d06](https://github.com/develoris/travel-trackr/commit/78b4d0659a3bfdda9a614daa0df18eb94972e16c))
+* **gihub:** auto approve release pr ([b449156](https://github.com/develoris/travel-trackr/commit/b449156e3244f6f6d5c1a1e2d15f6cf128752951))
+
 ## [1.2.0](https://github.com/develoris/travel-trackr/compare/travel-trackr-v1.1.0...travel-trackr-v1.2.0) (2026-03-15)
 
 
