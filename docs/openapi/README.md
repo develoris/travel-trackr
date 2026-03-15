@@ -47,3 +47,7 @@ Quando aggiungi/modifichi endpoint REST:
 2. Aggiorna `travel-trackr.openapi.yaml`.
 3. Rigenera JSON.
 4. Aggiorna README se cambia il flusso auth o i path principali.
+
+Per contesto funzionale del modulo travel (UI web, schema technical outdoor, PDF report):
+
+- [docs/TRAVEL_MODULE.md](../TRAVEL_MODULE.md)

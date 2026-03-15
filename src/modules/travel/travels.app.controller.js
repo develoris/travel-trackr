@@ -110,6 +110,38 @@ const getStageSpent = (stage) => {
   }, 0);
 };
 
+const getTechnicalSummary = (stage) => {
+  const technical = stage?.technical;
+
+  if (!technical) {
+    return null;
+  }
+
+  const chunks = [];
+
+  if (technical.distanceKm !== null && technical.distanceKm !== undefined) {
+    chunks.push(`${Number(technical.distanceKm).toFixed(1)} km`);
+  }
+
+  if (technical.elevationGainM !== null && technical.elevationGainM !== undefined) {
+    chunks.push(`+${Math.round(Number(technical.elevationGainM))} m`);
+  }
+
+  if (technical.movingTimeMin !== null && technical.movingTimeMin !== undefined) {
+    chunks.push(`${Math.round(Number(technical.movingTimeMin))} min`);
+  }
+
+  if (technical.difficulty) {
+    chunks.push(`Diff ${technical.difficulty}`);
+  }
+
+  if (technical.terrain) {
+    chunks.push(`Terreno ${technical.terrain}`);
+  }
+
+  return chunks.length ? chunks.join(" - ") : null;
+};
+
 const normalizeFileName = (value) => {
   return String(value || "viaggio")
     .toLowerCase()
@@ -534,14 +566,15 @@ export const getAppTravelReportPdf = async (req, res) => {
     doc.y = dayHeaderY + 30;
 
     group.activities.forEach((activity) => {
-      ensurePdfSpace(doc, 110);
+      ensurePdfSpace(doc, 120);
 
       const cardY = doc.y;
       const activitySpent = getStageSpent(activity);
       const activityHeader = `${formatTime(activity.startAt)}  ·  ${activity.activityType || "altro"}`;
+      const technicalSummary = getTechnicalSummary(activity);
 
       doc
-        .roundedRect(doc.page.margins.left, cardY, contentWidth, 78, 6)
+        .roundedRect(doc.page.margins.left, cardY, contentWidth, 90, 6)
         .fillAndStroke("#ffffff", palette.panelBorder);
 
       doc
@@ -562,6 +595,17 @@ export const getAppTravelReportPdf = async (req, res) => {
           width: contentWidth * 0.64
         });
 
+      if (technicalSummary) {
+        doc
+          .font("Helvetica")
+          .fontSize(9)
+          .fillColor("#334155")
+          .text(`Tecnico: ${technicalSummary}`, doc.page.margins.left + 10, cardY + 52, {
+            width: contentWidth * 0.64,
+            ellipsis: true
+          });
+      }
+
       doc
         .font("Helvetica-Bold")
         .fontSize(10)
@@ -578,12 +622,12 @@ export const getAppTravelReportPdf = async (req, res) => {
           .fillColor("#334155")
           .text(activity.description, doc.page.margins.left + (contentWidth * 0.7), cardY + 30, {
             width: contentWidth * 0.28,
-            height: 40,
+            height: 54,
             ellipsis: true
           });
       }
 
-      doc.y = cardY + 84;
+      doc.y = cardY + 96;
 
       if (activity.expenses?.length) {
         activity.expenses.forEach((expense) => {

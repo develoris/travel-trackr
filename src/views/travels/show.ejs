@@ -9,13 +9,17 @@
   <main class="flex-grow-1 py-4 py-md-5">
     <div class="container">
       <%- include("../partials/flash") %>
+      <% const statusLabels = { planned: 'Pianificato', ongoing: 'In corso', completed: 'Completato', cancelled: 'Annullato' }; %>
+      <% const categoryLabels = { escursione: 'Escursione', trekking: 'Trekking', visita: 'Visita', vacanza: 'Vacanza', roadtrip: 'Road trip', altro: 'Altro' }; %>
+      <% const activityTypeLabels = { trek: 'Trek', visita: 'Visita', trasferimento: 'Trasferimento', food: 'Cibo', relax: 'Relax', outdoor: 'Outdoor', altro: 'Altro' }; %>
+      <% const expenseCategoryLabels = { trasporto: 'Trasporto', alloggio: 'Alloggio', cibo: 'Cibo', attivita: 'Attività', attrezzatura: 'Attrezzatura', altro: 'Altro' }; %>
 
       <!-- Header compatto: senza hero per guadagnare spazio verticale -->
       <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
         <div>
           <a href="/users/app/travels" class="text-decoration-none small">&larr; Torna ai viaggi</a>
           <h1 class="h3 fw-bold mb-1 mt-2"><%= trip.title %></h1>
-          <p class="text-muted mb-0"><%= trip.locationSummary || 'Localita da definire' %></p>
+          <p class="text-muted mb-0"><%= trip.locationSummary || 'Località da definire' %></p>
         </div>
         <div class="d-flex gap-2">
           <!-- Export rapido del report condivisibile -->
@@ -36,7 +40,7 @@
           <div class="card h-100"><div class="card-body"><div class="text-muted small">Giorni pianificati</div><div class="fw-semibold"><%= trip.stats?.daysCount || 0 %></div></div></div>
         </div>
         <div class="col-6 col-md-3">
-          <div class="card h-100"><div class="card-body"><div class="text-muted small">Attivita</div><div class="fw-semibold"><%= trip.stats?.activitiesCount || trip.stats?.stagesCount || 0 %></div></div></div>
+          <div class="card h-100"><div class="card-body"><div class="text-muted small">Attività</div><div class="fw-semibold"><%= trip.stats?.activitiesCount || trip.stats?.stagesCount || 0 %></div></div></div>
         </div>
         <div class="col-6 col-md-3">
           <div class="card h-100"><div class="card-body"><div class="text-muted small">Spesa totale</div><div class="fw-semibold">EUR <%= Number(totalSpent || 0).toFixed(2) %></div></div></div>
@@ -61,11 +65,11 @@
             <h2 class="h5 mb-3">Modifica viaggio</h2>
             <form action="/users/app/travels/<%= trip._id %>/update" method="POST" class="row g-2">
               <div class="col-12 col-lg-6"><label class="form-label small text-muted mb-1">Titolo</label><input class="form-control" name="title" value="<%= trip.title %>" required /></div>
-              <div class="col-12 col-lg-3"><label class="form-label small text-muted mb-1">Categoria</label><select class="form-select" name="category"><% ['escursione','trekking','visita','vacanza','roadtrip','altro'].forEach((c) => { %><option value="<%= c %>" <%= trip.category === c ? 'selected' : '' %>><%= c %></option><% }) %></select></div>
-              <div class="col-12 col-lg-3"><label class="form-label small text-muted mb-1">Stato</label><select class="form-select" name="status"><% ['planned','ongoing','completed','cancelled'].forEach((s) => { %><option value="<%= s %>" <%= trip.status === s ? 'selected' : '' %>><%= s %></option><% }) %></select></div>
+              <div class="col-12 col-lg-3"><label class="form-label small text-muted mb-1">Categoria</label><select class="form-select" name="category"><% ['escursione','trekking','visita','vacanza','roadtrip','altro'].forEach((c) => { %><option value="<%= c %>" <%= trip.category === c ? 'selected' : '' %>><%= categoryLabels[c] || c %></option><% }) %></select></div>
+              <div class="col-12 col-lg-3"><label class="form-label small text-muted mb-1">Stato</label><select class="form-select" name="status"><% ['planned','ongoing','completed','cancelled'].forEach((s) => { %><option value="<%= s %>" <%= trip.status === s ? 'selected' : '' %>><%= statusLabels[s] || s %></option><% }) %></select></div>
               <div class="col-12 col-md-6"><label class="form-label small text-muted mb-1">Data inizio</label><input class="form-control" type="date" name="startDate" value="<%= new Date(trip.startDate).toISOString().slice(0,10) %>" /></div>
               <div class="col-12 col-md-6"><label class="form-label small text-muted mb-1">Data fine</label><input class="form-control" type="date" name="endDate" value="<%= new Date(trip.endDate).toISOString().slice(0,10) %>" /></div>
-              <div class="col-12"><label class="form-label small text-muted mb-1">Localita principali</label><input class="form-control" name="locationSummary" value="<%= trip.locationSummary || '' %>" /></div>
+              <div class="col-12"><label class="form-label small text-muted mb-1">Località principali</label><input class="form-control" name="locationSummary" value="<%= trip.locationSummary || '' %>" /></div>
               <div class="col-12 col-lg-6"><label class="form-label small text-muted mb-1">Descrizione</label><textarea class="form-control" name="description" rows="3"><%= trip.description || '' %></textarea></div>
               <div class="col-12 col-lg-6"><label class="form-label small text-muted mb-1">Note</label><textarea class="form-control" name="notes" rows="3"><%= trip.notes || '' %></textarea></div>
               <div class="col-12 d-flex justify-content-end"><button class="btn btn-dark" type="submit">Salva modifiche</button></div>
@@ -76,11 +80,11 @@
 
       <!-- Section header -->
       <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <h2 class="h5 mb-0">Giorni e attivita</h2>
+        <h2 class="h5 mb-0">Giorni e attività</h2>
         <div class="d-flex gap-2">
           <button class="btn btn-outline-secondary btn-sm" id="btnCollapseAll" type="button">Chiudi tutte</button>
-          <button class="btn btn-outline-secondary btn-sm" id="btnExpandAll" type="button">Esplodi tutte</button>
-          <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#newActivityModal">+ Nuova attivita</button>
+          <button class="btn btn-outline-secondary btn-sm" id="btnExpandAll" type="button">Apri tutte</button>
+          <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#newActivityModal">+ Nuova attività</button>
         </div>
       </div>
 
@@ -89,9 +93,9 @@
         <div class="card text-center py-5">
           <div class="card-body">
             <i class="bi bi-calendar-x text-secondary" style="font-size:2rem;"></i>
-            <h3 class="h5 mt-3">Nessuna attivita ancora</h3>
-            <p class="text-muted mb-3">Aggiungi la prima attivita con il pulsante in alto.</p>
-            <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#newActivityModal">+ Nuova attivita</button>
+            <h3 class="h5 mt-3">Nessuna attività ancora</h3>
+            <p class="text-muted mb-3">Aggiungi la prima attività con il pulsante in alto.</p>
+            <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#newActivityModal">+ Nuova attività</button>
           </div>
         </div>
       <% } else { %>
@@ -105,7 +109,7 @@
             <h2 class="accordion-header">
               <button class="accordion-button <%= isOpen ? '' : 'collapsed' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDay<%= dayId %>" aria-expanded="<%= isOpen %>">
                 <% if (group.dayNumber === Number.MAX_SAFE_INTEGER) { %>
-                  <span class="fw-semibold">Attivita senza giorno</span>
+                  <span class="fw-semibold">Attività senza giorno</span>
                 <% } else { %>
                   <span class="fw-semibold">Giorno <%= group.dayNumber %></span>
                 <% } %>
@@ -122,7 +126,7 @@
                           <div>
                             <h3 class="h6 mb-1"><%= stage.title %></h3>
                             <div class="text-muted small">
-                              <span class="badge text-bg-secondary me-1"><%= stage.activityType %></span>
+                              <span class="badge text-bg-secondary me-1"><%= activityTypeLabels[stage.activityType] || stage.activityType %></span>
                               <% if (stage.startAt) { %><span><i class="bi bi-clock me-1"></i><%= new Date(stage.startAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) %></span><% } %>
                               <% if (stage.location) { %><span class="ms-2"><i class="bi bi-geo-alt me-1"></i><%= stage.location %></span><% } %>
                             </div>
@@ -130,17 +134,36 @@
                           <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#editActivity<%= stage._id %>" aria-expanded="false">Modifica</button>
                         </div>
                         <% if (stage.description) { %><p class="text-muted small mb-3"><%= stage.description %></p><% } %>
+                        <% const hasTechnical = stage.technical && (stage.technical.distanceKm != null || stage.technical.elevationGainM != null || stage.technical.movingTimeMin != null || stage.technical.difficulty || stage.technical.terrain || stage.technical.gpxUrl); %>
+                        <% if (hasTechnical) { %>
+                          <div class="small mb-3">
+                            <span class="badge text-bg-light border me-1">Tecnico</span>
+                            <% if (stage.technical.distanceKm != null) { %><span class="text-muted me-2"><strong><%= Number(stage.technical.distanceKm).toFixed(1) %> km</strong></span><% } %>
+                            <% if (stage.technical.elevationGainM != null) { %><span class="text-muted me-2"><strong>+<%= Math.round(stage.technical.elevationGainM) %> m</strong></span><% } %>
+                            <% if (stage.technical.movingTimeMin != null) { %><span class="text-muted me-2"><strong><%= Math.round(stage.technical.movingTimeMin) %> min</strong></span><% } %>
+                            <% if (stage.technical.difficulty) { %><span class="text-muted me-2">Difficoltà: <%= stage.technical.difficulty %></span><% } %>
+                            <% if (stage.technical.terrain) { %><span class="text-muted me-2">Terreno: <%= stage.technical.terrain %></span><% } %>
+                            <% if (stage.technical.gpxUrl) { %><a href="<%= stage.technical.gpxUrl %>" target="_blank" rel="noopener noreferrer">GPX</a><% } %>
+                          </div>
+                        <% } %>
 
                         <!-- Edit activity (collapse) -->
                         <div class="collapse mb-3" id="editActivity<%= stage._id %>">
                           <div class="card card-body bg-light border-0">
                             <form action="/users/app/travels/<%= trip._id %>/stages/<%= stage._id %>/update" method="POST" class="row g-2">
                               <div class="col-12 col-md-7"><label class="form-label small text-muted mb-1">Titolo</label><input class="form-control form-control-sm" name="title" value="<%= stage.title %>" required /></div>
-                              <div class="col-12 col-md-5"><label class="form-label small text-muted mb-1">Tipo</label><select class="form-select form-select-sm" name="activityType"><% ['trek','visita','trasferimento','food','relax','outdoor','altro'].forEach((type) => { %><option value="<%= type %>" <%= stage.activityType === type ? 'selected' : '' %>><%= type %></option><% }) %></select></div>
+                              <div class="col-12 col-md-5"><label class="form-label small text-muted mb-1">Tipo</label><select class="form-select form-select-sm" name="activityType"><% ['trek','visita','trasferimento','food','relax','outdoor','altro'].forEach((type) => { %><option value="<%= type %>" <%= stage.activityType === type ? 'selected' : '' %>><%= activityTypeLabels[type] || type %></option><% }) %></select></div>
                               <div class="col-12 col-md-6"><label class="form-label small text-muted mb-1">Giorno</label><input class="form-control form-control-sm" type="number" min="1" step="1" name="dayNumber" value="<%= stage.dayNumber || '' %>" /></div>
                               <div class="col-12 col-md-6"><label class="form-label small text-muted mb-1">Orario inizio</label><input class="form-control form-control-sm" type="time" name="startTime" value="<%= stage.startAt ? new Date(stage.startAt).toISOString().slice(11,16) : '' %>" /></div>
                               <div class="col-12"><label class="form-label small text-muted mb-1">Luogo</label><input class="form-control form-control-sm" name="location" value="<%= stage.location || '' %>" /></div>
                               <div class="col-12"><label class="form-label small text-muted mb-1">Descrizione</label><textarea class="form-control form-control-sm" name="description" rows="2"><%= stage.description || '' %></textarea></div>
+                              <div class="col-12"><hr class="my-1" /><p class="small text-muted mb-0">Dati tecnici (opzionali)</p></div>
+                              <div class="col-6 col-md-4"><label class="form-label small text-muted mb-1">Distanza (km)</label><input class="form-control form-control-sm" type="number" min="0" step="0.1" name="technical[distanceKm]" value="<%= stage.technical?.distanceKm ?? '' %>" /></div>
+                              <div class="col-6 col-md-4"><label class="form-label small text-muted mb-1">Dislivello + (m)</label><input class="form-control form-control-sm" type="number" min="0" step="1" name="technical[elevationGainM]" value="<%= stage.technical?.elevationGainM ?? '' %>" /></div>
+                              <div class="col-6 col-md-4"><label class="form-label small text-muted mb-1">Tempo in movimento (min)</label><input class="form-control form-control-sm" type="number" min="0" step="1" name="technical[movingTimeMin]" value="<%= stage.technical?.movingTimeMin ?? '' %>" /></div>
+                              <div class="col-6 col-md-4"><label class="form-label small text-muted mb-1">Difficoltà</label><select class="form-select form-select-sm" name="technical[difficulty]"><option value="">Non specificata</option><% [['facile','Facile'],['media','Media'],['impegnativa','Impegnativa'],['esperto','Esperto']].forEach((item) => { %><option value="<%= item[0] %>" <%= stage.technical?.difficulty === item[0] ? 'selected' : '' %>><%= item[1] %></option><% }) %></select></div>
+                              <div class="col-6 col-md-4"><label class="form-label small text-muted mb-1">Terreno</label><select class="form-select form-select-sm" name="technical[terrain]"><option value="">Non specificato</option><% [['asfalto','Asfalto'],['sterrato','Sterrato'],['sentiero','Sentiero'],['misto','Misto']].forEach((item) => { %><option value="<%= item[0] %>" <%= stage.technical?.terrain === item[0] ? 'selected' : '' %>><%= item[1] %></option><% }) %></select></div>
+                              <div class="col-12 col-md-4"><label class="form-label small text-muted mb-1">Link GPX</label><input class="form-control form-control-sm" type="url" name="technical[gpxUrl]" value="<%= stage.technical?.gpxUrl || '' %>" /></div>
                               <div class="col-12 d-flex justify-content-end gap-2">
                                 <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#editActivity<%= stage._id %>">Annulla</button>
                                 <button class="btn btn-dark btn-sm" type="submit">Salva</button>
@@ -158,7 +181,7 @@
                             <ul class="list-group list-group-flush mb-2">
                               <% stage.expenses.forEach((expense) => { %>
                                 <li class="list-group-item px-0 py-1 d-flex justify-content-between align-items-center">
-                                  <span class="small"><strong><%= expense.title %></strong> <span class="text-muted">(<%= expense.category %>)</span></span>
+                                  <span class="small"><strong><%= expense.title %></strong> <span class="text-muted">(<%= expenseCategoryLabels[expense.category] || expense.category %>)</span></span>
                                   <span class="small">EUR <%= Number(expense.amount || 0).toFixed(2) %></span>
                                 </li>
                               <% }) %>
@@ -167,7 +190,7 @@
                           <form action="/users/app/travels/<%= trip._id %>/stages/<%= stage._id %>/expenses" method="POST" class="row g-2">
                             <div class="col-md-5"><input class="form-control form-control-sm" name="title" placeholder="Spesa" required /></div>
                             <div class="col-md-3"><input class="form-control form-control-sm" name="amount" type="number" step="0.01" min="0" placeholder="0.00" required /></div>
-                            <div class="col-md-4"><select class="form-select form-select-sm" name="category"><option value="trasporto">Trasporto</option><option value="alloggio">Alloggio</option><option value="cibo">Cibo</option><option value="attivita">Attivita</option><option value="attrezzatura">Attrezzatura</option><option value="altro">Altro</option></select></div>
+                            <div class="col-md-4"><select class="form-select form-select-sm" name="category"><option value="trasporto">Trasporto</option><option value="alloggio">Alloggio</option><option value="cibo">Cibo</option><option value="attivita">Attività</option><option value="attrezzatura">Attrezzatura</option><option value="altro">Altro</option></select></div>
                             <div class="col-12"><button class="btn btn-outline-dark btn-sm" type="submit">Aggiungi spesa</button></div>
                           </form>
                         </div>

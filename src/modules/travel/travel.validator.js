@@ -5,6 +5,8 @@ const tripCategories = ["escursione", "trekking", "visita", "vacanza", "roadtrip
 const tripStatuses = ["planned", "ongoing", "completed", "cancelled"];
 const stageActivityTypes = ["trek", "visita", "trasferimento", "food", "relax", "outdoor", "altro"];
 const expenseCategories = ["trasporto", "alloggio", "cibo", "attivita", "attrezzatura", "altro"];
+const stageDifficultyLevels = ["facile", "media", "impegnativa", "esperto"];
+const stageTerrains = ["asfalto", "sterrato", "sentiero", "misto"];
 
 export const listTripsValidator = [
   query("status").optional().isIn(tripStatuses).withMessage("status non valido"),
@@ -50,7 +52,13 @@ export const addStageValidator = [
   body("startAt").optional({ values: "falsy" }).isISO8601().withMessage("startAt non valido"),
   body("endAt").optional({ values: "falsy" }).isISO8601().withMessage("endAt non valido"),
   body("parentStageId").optional({ values: "falsy" }).isMongoId().withMessage("parentStageId non valido"),
-  body("notes").optional({ values: "falsy" }).isString().isLength({ max: 1000 })
+  body("notes").optional({ values: "falsy" }).isString().isLength({ max: 1000 }),
+  body("technical.distanceKm").optional({ values: "falsy" }).isFloat({ min: 0 }).withMessage("distanceKm non valido"),
+  body("technical.elevationGainM").optional({ values: "falsy" }).isFloat({ min: 0 }).withMessage("elevationGainM non valido"),
+  body("technical.movingTimeMin").optional({ values: "falsy" }).isInt({ min: 0 }).withMessage("movingTimeMin non valido"),
+  body("technical.difficulty").optional({ values: "falsy" }).isIn(stageDifficultyLevels).withMessage("difficulty non valida"),
+  body("technical.terrain").optional({ values: "falsy" }).isIn(stageTerrains).withMessage("terrain non valido"),
+  body("technical.gpxUrl").optional({ values: "falsy" }).isURL().withMessage("gpxUrl non valido")
 ];
 
 export const addExpenseValidator = [
@@ -81,6 +89,12 @@ export const appAddStageValidator = [
   body("existingDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Giorno esistente non valido"),
   body("newDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Nuovo giorno non valido"),
   body("startTime").optional({ values: "falsy" }).matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage("Orario non valido"),
+  body("technical.distanceKm").optional({ values: "falsy" }).isFloat({ min: 0 }).withMessage("Distanza non valida"),
+  body("technical.elevationGainM").optional({ values: "falsy" }).isFloat({ min: 0 }).withMessage("Dislivello non valido"),
+  body("technical.movingTimeMin").optional({ values: "falsy" }).isInt({ min: 0 }).withMessage("Tempo in movimento non valido"),
+  body("technical.difficulty").optional({ values: "falsy" }).isIn(stageDifficultyLevels).withMessage("Difficolta non valida"),
+  body("technical.terrain").optional({ values: "falsy" }).isIn(stageTerrains).withMessage("Terreno non valido"),
+  body("technical.gpxUrl").optional({ values: "falsy" }).isURL().withMessage("Link GPX non valido"),
   body().custom((_, { req }) => {
     const mode = req.body.dayMode;
     const hasAnyDayNumber = Boolean(req.body.dayNumber || req.body.existingDayNumber || req.body.newDayNumber);
@@ -126,7 +140,13 @@ export const appUpdateStageValidator = [
   body("newDayNumber").optional({ values: "falsy" }).isInt({ min: 1 }).withMessage("Nuovo giorno non valido"),
   body("startTime").optional({ values: "falsy" }).matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage("Orario non valido"),
   body("startAt").optional({ values: "falsy" }).isISO8601().withMessage("Data/ora inizio non valida"),
-  body("endAt").optional({ values: "falsy" }).isISO8601().withMessage("Data/ora fine non valida")
+  body("endAt").optional({ values: "falsy" }).isISO8601().withMessage("Data/ora fine non valida"),
+  body("technical.distanceKm").optional({ values: "falsy" }).isFloat({ min: 0 }).withMessage("Distanza non valida"),
+  body("technical.elevationGainM").optional({ values: "falsy" }).isFloat({ min: 0 }).withMessage("Dislivello non valido"),
+  body("technical.movingTimeMin").optional({ values: "falsy" }).isInt({ min: 0 }).withMessage("Tempo in movimento non valido"),
+  body("technical.difficulty").optional({ values: "falsy" }).isIn(stageDifficultyLevels).withMessage("Difficolta non valida"),
+  body("technical.terrain").optional({ values: "falsy" }).isIn(stageTerrains).withMessage("Terreno non valido"),
+  body("technical.gpxUrl").optional({ values: "falsy" }).isURL().withMessage("Link GPX non valido")
 ];
 
 export const appAddExpenseValidator = [

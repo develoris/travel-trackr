@@ -2,72 +2,57 @@
 
 Questa guida descrive come e organizzato il codice oggi e come fluisce una richiesta nel progetto.
 
-## 1. Entry point
+## 1. Bootstrap e avvio
 
-File: src/index.js
+Il bootstrap e stato separato in moduli dedicati.
+
+File principali:
+
+1. src/index.js
+2. src/app/bootstrap.js
+3. src/app/create-app.js
+4. src/app/register-shutdown.js
 
 Responsabilita principali:
 
-1. Carica env e inizializza Express.
-2. Registra middleware globali (cors, cookieParser, json, urlencoded, session).
-3. Configura EJS e cartella views.
-4. Reindirizza GET / verso /users/app.
-5. Monta il router users su /users.
+1. src/index.js: carica env e avvia bootstrap.
+2. bootstrap.js: connessione DB, seed mock opzionale, backup cron opzionale, start server.
+3. create-app.js: costruisce app Express con middleware globali, sessione e router.
+4. register-shutdown.js: gestione SIGINT/SIGTERM e chiusura pulita DB/server.
 
 Modalita DB:
 
 1. Standard: usa MONGODB_URI.
-2. Demo/mock: con USE_IN_MEMORY_DB=true avvia Mongo in-memory (mongodb-memory-server).
+2. Demo/mock: con USE_IN_MEMORY_DB=true avvia Mongo in-memory (mongodb-memory-server) e seed dati demo.
 
-In pratica, tutto il traffico applicativo passa dal modulo users.
+## 2. Moduli applicativi
 
-## 2. Modulo users
+Il progetto ha due moduli verticali principali:
 
-Il modulo users contiene due canali:
+1. Modulo user
+2. Modulo travel
 
-1. Canale web (EJS) in users.app.controller.js
-2. Canale API (JSON) in user.controller.js
+Entrambi sono montati sotto prefisso /users.
 
-Il routing e centralizzato in user.routes.js.
+## 2.1 Modulo user
 
-### 2.1 user.routes.js
+File principali:
 
-File: src/modules/user/user.routes.js
+1. src/modules/user/user.routes.js
+2. src/modules/user/users.app.controller.js
+3. src/modules/user/user.controller.js
+4. src/modules/user/user.service.js
+5. src/modules/user/user.model.js
 
-Contiene:
+Canali:
 
-1. Route EJS sotto /users/app/*
-2. Route API sotto /users/*
-3. Validator express-validator applicati alle route API
-
-### 2.2 users.app.controller.js
-
-File: src/modules/user/users.app.controller.js
-
-Gestisce UX server-rendered:
-
-1. Login form e submit.
-2. Register form e submit.
-3. Home app protetta.
-4. Logout web.
-5. Flash messages via sessione.
+1. Web EJS (/users/app/*): login, profilo, admin utenti.
+2. API JSON (/users/*): auth JWT, refresh token, CRUD utente.
 
 Stato sessione web:
 
 - req.session.webUser: utente loggato lato pagine EJS
 - req.session.flash: messaggi one-shot (success/error)
-
-### 2.3 user.controller.js
-
-File: src/modules/user/user.controller.js
-
-Gestisce endpoint API JSON.
-
-Auth API:
-
-1. POST /users/login -> ritorna accessToken nel body.
-2. POST /users/refresh -> legge refresh token da cookie HttpOnly tt.rt.
-3. POST /users/logout -> invalida sessione token e pulisce cookie.
 
 Nota cookie refresh:
 
@@ -75,33 +60,30 @@ Nota cookie refresh:
 - HttpOnly: true
 - Path: /users/refresh
 
-Questo significa che il browser invia il cookie solo quando chiami /users/refresh.
+## 2.2 Modulo travel
 
-### 2.4 user.service.js
+File principali:
 
-File: src/modules/user/user.service.js
+1. src/modules/travel/travel.routes.js
+2. src/modules/travel/travels.app.controller.js
+3. src/modules/travel/travel.controller.js
+4. src/modules/travel/travel.service.js
+5. src/modules/travel/travel.model.js
+6. src/modules/travel/travel.validator.js
 
-Contiene la business logic:
+Canali:
 
-1. CRUD user.
-2. Registrazione e login.
-3. Emissione e rotazione JWT.
-4. Verifica refresh token e revoca.
+1. Web EJS (/users/app/travels*): lista, dettaglio, modifica, attivita, spese, PDF.
+2. API JSON (/users/travels*): CRUD viaggi, stage, spese.
 
-Il controller API chiama il service e si occupa solo delle risposte HTTP.
+Dati principali:
 
-### 2.5 user.model.js
+1. Trip: meta viaggio e timeline stages.
+2. Stage: attivita per giorno con ordinamento e sequence.
+3. Expense: spesa associata a stage.
+4. Technical (opzionale): campi outdoor come distanza, dislivello, moving time, difficolta, terreno, GPX.
 
-File: src/modules/user/user.model.js
-
-Definisce schema Mongoose User.
-
-Dettagli importanti:
-
-1. pre save per hash password (bcrypt).
-2. verifyPassword come metodo istanza.
-3. Campo auth per token hash e metadata login.
-4. toJSON rimuove campi sensibili.
+Per dettaglio esteso: docs/TRAVEL_MODULE.md.
 
 ## 3. Middleware condivisi
 
@@ -115,7 +97,9 @@ Cartella: src/middlewares
 	- controlla ruolo utente
 	- uso tipico: authorize("admin")
 
-Questi middleware sono pronti per proteggere nuove route (es. travel).
+3. request-id.js
+	- assegna requestId univoco a ogni richiesta
+	- usato nei log errori per tracciabilita
 
 ## 3.1 Error handling globale
 
@@ -124,7 +108,6 @@ File principali:
 1. src/core/errors/app-error.js
 2. src/core/errors/error-utils.js
 3. src/middlewares/error-handler.js
-4. src/middlewares/request-id.js
 
 Flusso:
 
@@ -134,15 +117,23 @@ Flusso:
 4. Se la request e API -> ritorna payload JSON standard.
 5. Se la request e EJS -> flash+redirect oppure pagina error.ejs.
 
-Questo schema permette di mantenere messaggi user-friendly verso il frontend e dettagli utili al debug verso i log sviluppatore.
+Questo schema mantiene messaggi user-friendly verso il frontend e dettagli tecnici nei log.
 
 ## 4. Views EJS
 
 Cartella: src/views
 
-1. index.ejs: home attuale (placeholder I miei viaggi).
-2. auth/login.ejs e auth/register.ejs.
-3. partials/head.ejs, navbar.ejs, flash.ejs.
+Aree principali:
+
+1. auth/: login/register
+2. account/: profilo e cambio password
+3. admin/: gestione utenti
+4. travels/: lista, nuovo, dettaglio, modal attivita
+5. partials/: head, navbar, flash
+
+Nota utile:
+
+- res.locals.currentPath viene impostato globalmente in create-app.js per evidenziare voci attive in UI.
 
 ## 5. Flussi principali
 
@@ -153,6 +144,14 @@ Cartella: src/views
 3. Se ok -> salva req.session.webUser.
 4. Redirect /users/app.
 
+### Flusso travel web
+
+1. GET /users/app/travels (lista paginata/filtri).
+2. GET /users/app/travels/:tripId (dettaglio per giorno).
+3. POST /users/app/travels/:tripId/stages (nuova attivita).
+4. POST /users/app/travels/:tripId/stages/:stageId/expenses (spese).
+5. GET /users/app/travels/:tripId/report.pdf (export report).
+
 ### Flusso API login + refresh
 
 1. POST /users/login con email/password.
@@ -162,14 +161,15 @@ Cartella: src/views
 
 ## 6. Convenzioni correnti
 
-1. Modulo users autosufficiente (route, controller, service, model, validator).
+1. Moduli verticali autosufficienti (route, controller, service, model, validator).
 2. Distinzione netta tra controller web e controller API.
 3. Logica business nel service.
 4. Path funzionali sotto prefisso /users.
+5. Error handling centralizzato con AppError.
 
 ## 7. Prossimi step suggeriti
 
-1. Aggiungere modulo travel con stessa forma del modulo users.
-2. Proteggere route sensibili con authenticate e authorize.
-3. Introdurre test automatici per service e route.
-4. Separare config auth in un file dedicato (constants/config).
+1. Introdurre i18n per label/testi UI (dati utente invariati).
+2. Aggiungere test automatici service e route per modulo travel.
+3. Estendere API travel con update/delete stage su canale REST.
+4. Migliorare osservabilita (log strutturati e metriche).

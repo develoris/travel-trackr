@@ -5,6 +5,7 @@ Applicazione Node.js con interfaccia EJS e API JSON per gestione viaggi, utenti 
 ## Stato attuale
 
 - Modulo users completo (web + API) sotto prefisso `/users`
+- Modulo travel completo (web + API) con timeline per giorno, spese e PDF report
 - Login web con sessione server-side (`req.session.webUser`)
 - Login API con JWT access token e refresh token in cookie HttpOnly
 - Pagina iniziale web su `/users/app`
@@ -15,6 +16,7 @@ Per una spiegazione piu tecnica, leggi:
 - [docs/ERROR_HANDLING.md](docs/ERROR_HANDLING.md)
 - [docs/USER_ACCESS_AND_ADMIN.md](docs/USER_ACCESS_AND_ADMIN.md)
 - [docs/BACKUP_AND_RESTORE.md](docs/BACKUP_AND_RESTORE.md)
+- [docs/TRAVEL_MODULE.md](docs/TRAVEL_MODULE.md)
 - [docs/openapi/README.md](docs/openapi/README.md)
 
 ## Stack
@@ -47,6 +49,8 @@ In modalita mock vengono creati automaticamente utenti demo (idempotenti):
 - email: `demo.admin@travel-trackr.local` - password: `Password123!`
 
 Per disattivare il seed automatico imposta `SEED_MOCK_DATA=false`.
+
+I mock includono piu scenari travel (planned/ongoing/completed/cancelled, con e senza attivita, con dati tecnici outdoor completi/parziali).
 
 Server locale: http://localhost:3000
 
@@ -136,7 +140,10 @@ Autenticazione token in Swagger:
 - GET /users/app/travels/new
 - POST /users/app/travels
 - GET /users/app/travels/:tripId
+- GET /users/app/travels/:tripId/report.pdf
+- POST /users/app/travels/:tripId/update
 - POST /users/app/travels/:tripId/stages
+- POST /users/app/travels/:tripId/stages/:stageId/update
 - POST /users/app/travels/:tripId/stages/:stageId/expenses
 - POST /users/app/travels/:tripId/delete
 
@@ -174,11 +181,19 @@ Dettaglio completo: [docs/USER_ACCESS_AND_ADMIN.md](docs/USER_ACCESS_AND_ADMIN.m
 - POST /users/travels/:tripId/stages
 - POST /users/travels/:tripId/stages/:stageId/expenses
 
+Per dettagli del modulo travel (schema, technical outdoor, PDF e flussi):
+
+- [docs/TRAVEL_MODULE.md](docs/TRAVEL_MODULE.md)
+
 ## Struttura progetto
 
 ```text
 src/
     index.js
+    app/
+        bootstrap.js
+        create-app.js
+        register-shutdown.js
     middlewares/
         authenticate.js
         authorize.js
