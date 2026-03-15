@@ -95,6 +95,13 @@ router.post(
   v.validateRequest,
   asyncHandler(api.postStage)
 );
+router.delete(
+  "/travels/:tripId/stages/:stageId",
+  authenticate,
+  v.deleteStageValidator,
+  v.validateRequest,
+  asyncHandler(api.removeStage)
+);
 router.post(
   "/travels/:tripId/stages/:stageId/expenses",
   authenticate,

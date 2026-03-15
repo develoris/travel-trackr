@@ -73,19 +73,28 @@ Perche serve:
 
 File attuale: [tests/e2e/travel.web.delete-stage.e2e.test.js](tests/e2e/travel.web.delete-stage.e2e.test.js)
 
+File aggiuntivo: [tests/e2e/travel.api.delete-stage.e2e.test.js](tests/e2e/travel.api.delete-stage.e2e.test.js)
+
+File aggiuntivo: [tests/e2e/user.api.authorization.e2e.test.js](tests/e2e/user.api.authorization.e2e.test.js)
+
 Copertura attuale:
 
 - login web;
 - creazione viaggio;
 - aggiunta stage;
 - delete stage tramite route web;
-- verifica finale su database.
+- verifica finale su database;
+- login API e ottenimento Bearer token;
+- delete stage tramite endpoint REST JSON;
+- vincolo di ownership: un utente non puo eliminare stage di un altro owner.
+- verifica autorizzazione su API utenti: anonimo bloccato, utente standard bloccato, admin ammesso.
 
 Perche serve:
 
 - conferma che il flusso usato davvero dall'utente continui a funzionare;
 - copre sessione, route, middleware, controller, service e persistenza in un colpo solo;
-- e il test piu vicino al comportamento reale dell'app.
+- e il test piu vicino al comportamento reale dell'app;
+- protegge gia il percorso server-only, cosi la futura rimozione di EJS non lascia scoperta la delete stage.
 
 ## Quando aggiungere un test unit, integration o e2e
 

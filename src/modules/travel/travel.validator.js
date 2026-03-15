@@ -72,6 +72,11 @@ export const addExpenseValidator = [
   body("notes").optional({ values: "falsy" }).isString().isLength({ max: 500 })
 ];
 
+export const deleteStageValidator = [
+  ...tripIdValidator,
+  param("stageId").isMongoId().withMessage("stageId non valido")
+];
+
 export const appCreateTripValidator = [
   body("title").trim().notEmpty().withMessage("Titolo obbligatorio").isLength({ max: 140 }),
   body("startDate").notEmpty().withMessage("Data inizio obbligatoria").isISO8601(),

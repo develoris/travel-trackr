@@ -52,12 +52,14 @@ Note:
 - PATCH /users/travels/:tripId
 - DELETE /users/travels/:tripId
 - POST /users/travels/:tripId/stages
+- DELETE /users/travels/:tripId/stages/:stageId
 - POST /users/travels/:tripId/stages/:stageId/expenses
 
 Note:
 
 - Le route API richiedono Bearer token (middleware authenticate).
 - Le validazioni API ritornano payload JSON standard.
+- Le query e le mutazioni lavorano sempre sul perimetro dell'owner autenticato, quindi un utente non puo eliminare stage appartenenti ad altri viaggiatori.
 
 ## 3. Modello dati
 
@@ -241,16 +243,23 @@ Copertura attuale rilevante per il modulo travel:
 - calcolo virtual `stats` del trip;
 - lookup di una stage embedded con `findStageById`;
 - delete stage nel service con riallineamento di `sequence`;
-- flusso web completo login -> crea viaggio -> aggiungi stage -> elimina stage.
+- flusso web completo login -> crea viaggio -> aggiungi stage -> elimina stage;
+- flusso REST delete stage con Bearer token e verifica isolamento owner.
 
 Perche e importante:
 
 - la delete stage non e solo rimozione dati, ma anche coerenza della timeline per giorno;
 - i test unit proteggono la logica piu economica da eseguire;
 - i test integration proteggono il comportamento con Mongoose;
-- i test e2e proteggono il flusso davvero usato dall'utente finale.
+- i test e2e proteggono sia il flusso web attuale sia il canale API, utile in vista della futura rimozione di EJS.
 
-## 9. Seed mock
+## 9. Evoluzione verso server-only
+
+Per non legare la business logic alla UI EJS, le azioni critiche devono esistere anche sul canale JSON.
+
+La delete stage e ora supportata sia via web sia via REST, con le stesse regole di ownership e gli stessi errori dominio.
+
+## 10. Seed mock
 
 File: src/scripts/seed-mock-data.js
 

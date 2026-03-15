@@ -2,6 +2,7 @@ import {
   addExpenseToStage,
   addStageToTrip,
   createTripForOwner,
+  deleteStageFromTrip,
   deleteTripForOwner,
   getTripByIdForOwner,
   listTripsByOwner,
@@ -76,6 +77,32 @@ export const postStage = async (req, res) => {
   }
 
   return res.status(201).json(result.stage);
+};
+
+export const removeStage = async (req, res) => {
+  const result = await deleteStageFromTrip(
+    req.params.tripId,
+    req.params.stageId,
+    getAuthUserId(req)
+  );
+
+  if (!result.trip) {
+    throw new AppError({
+      code: "TRIP_NOT_FOUND",
+      status: 404,
+      userMessage: "Viaggio non trovato."
+    });
+  }
+
+  if (!result.stage) {
+    throw new AppError({
+      code: "STAGE_NOT_FOUND",
+      status: 404,
+      userMessage: "Attivita non trovata."
+    });
+  }
+
+  return res.status(204).send();
 };
 
 export const postExpense = async (req, res) => {

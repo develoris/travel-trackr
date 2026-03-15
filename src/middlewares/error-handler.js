@@ -20,22 +20,26 @@ export const errorHandler = (error, req, res, _next) => {
   // Normalizza sempre in AppError, anche se arriva un Error generico o un crash.
   const appError = toAppError(error);
   const status = appError.status || 500;
+  const isTestEnv = process.env.NODE_ENV === "test" || Boolean(process.env.JEST_WORKER_ID);
+  const shouldLogError = !isTestEnv || status >= 500;
   // requestId è iniettato dal middleware request-id.js: utile per trovare
   // la riga esatta nei log quando un utente segnala un problema.
   const requestId = req.requestId || "n/a";
 
   // Log compatto su una riga: facile da grep, evita dump annidati di oggetti Error.
-  console.error(
-    `[ERROR] requestId=${requestId} method=${req.method} url=${req.originalUrl} status=${status} code=${appError.code} message=${appError.developerMessage}`
-  );
+  if (shouldLogError) {
+    console.error(
+      `[ERROR] requestId=${requestId} method=${req.method} url=${req.originalUrl} status=${status} code=${appError.code} message=${appError.developerMessage}`
+    );
+  }
 
   // Dettagli aggiuntivi (es. errori di validazione) in riga separata.
-  if (appError.details) {
+  if (shouldLogError && appError.details) {
     console.error("[ERROR_DETAILS]", appError.details);
   }
 
   // Stack trace solo in sviluppo: in produzione riduce il rumore nei log.
-  if (process.env.NODE_ENV !== "production" && appError.stack) {
+  if (shouldLogError && process.env.NODE_ENV !== "production" && appError.stack) {
     console.error(appError.stack);
   }
 
