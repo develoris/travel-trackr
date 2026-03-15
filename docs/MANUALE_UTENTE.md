@@ -159,6 +159,17 @@ La timeline e organizzata in accordion per giorno.
     - Descrizione
 4. Salva con "Aggiungi attivita".
 
+Come funziona "Nuovo giorno":
+
+- il sistema assegna automaticamente il prossimo numero giorno disponibile
+- esempio: se hai Giorno 1 e Giorno 2, la nuova attivita in "Nuovo giorno" andra in Giorno 3
+- non devi inserire manualmente il numero del giorno
+
+Come funziona l'orario inizio:
+
+- se inserisci solo orario (es. 08:30), il sistema lo aggancia alla data del giorno selezionato
+- se non inserisci orario, l'attivita viene salvata comunque
+
 Se l'orario non e indicato, l'attivita viene comunque salvata ma l'ordinamento puo risultare meno preciso.
 
 ### 8.2 Modificare una attivita esistente

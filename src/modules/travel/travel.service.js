@@ -87,6 +87,8 @@ const deriveDayNumber = (tripStartDate, stageStartAt) => {
 };
 
 const getDayNumberFromPayload = (payload = {}) => {
+  // Priorita input UI/API: dayNumber esplicito, poi selezione giorno esistente,
+  // infine newDayNumber (se passato dal client). Se assenti, torna null.
   const direct = toNumberOrNull(payload.dayNumber);
   const existingDay = toNumberOrNull(payload.existingDayNumber);
   const newDay = toNumberOrNull(payload.newDayNumber);
@@ -95,6 +97,8 @@ const getDayNumberFromPayload = (payload = {}) => {
 };
 
 const getNextDayNumber = (trip) => {
+  // Modalita "new day": usa il massimo dayNumber presente nel viaggio + 1.
+  // In questo modo il nuovo giorno viene sempre accodato alla timeline.
   const maxDay = (trip.stages || []).reduce((max, stage) => {
     const day = Number(stage.dayNumber || 0);
     return day > max ? day : max;
@@ -104,6 +108,8 @@ const getNextDayNumber = (trip) => {
 };
 
 const buildStartAtFromDayAndTime = (tripStartDate, dayNumber, startTime) => {
+  // Converte "giorno N + HH:mm" in una data completa ancorata allo startDate del trip.
+  // Esempio: startDate=10/06, dayNumber=3, startTime=08:30 -> 12/06 08:30.
   if (!tripStartDate || !dayNumber || !startTime) {
     return null;
   }
@@ -141,6 +147,8 @@ const recalculateDaySequence = (trip, dayNumber) => {
     return;
   }
 
+  // Ricalcola l'ordine interno del giorno: prima per orario startAt,
+  // poi per titolo (fallback deterministico se manca l'orario).
   const sameDayStages = (trip.stages || [])
     .filter((stage) => Number(stage.dayNumber || 0) === Number(dayNumber))
     .sort((a, b) => {
@@ -293,10 +301,20 @@ export const addStageToTrip = async (tripId, ownerId, payload) => {
 
   const explicitDayNumber = getDayNumberFromPayload(payload);
   const isNewDayMode = payload?.dayMode === "new";
+
+  // 1) Risolve il giorno:
+  // - se arriva un giorno esplicito, usa quello;
+  // - se dayMode="new", genera il prossimo giorno disponibile (max + 1).
   const resolvedDayNumber = explicitDayNumber || (isNewDayMode ? getNextDayNumber(trip) : null);
+
+  // 2) Risolve startAt:
+  // - startAt pieno ha priorita;
+  // - altrimenti costruisce la data da (startDate trip + dayNumber + startTime).
   const preciseStartAt = normalizeDate(payload.startAt);
   const inferredStartAt = buildStartAtFromDayAndTime(trip.startDate, resolvedDayNumber, payload.startTime);
   const startAt = preciseStartAt || inferredStartAt;
+
+  // 3) Se il giorno non e stato esplicitato, prova a inferirlo da startAt.
   const dayNumber = resolvedDayNumber || deriveDayNumber(trip.startDate, startAt);
   const sequence = getNextStageSequence(trip, dayNumber);
 
@@ -400,8 +418,31 @@ export const updateStageInTrip = async (tripId, stageId, ownerId, payload) => {
     stage.sequence = getNextStageSequence(trip, stage.dayNumber);
   }
 
+  // Se l'attivita cambia giorno o orario, riallineiamo sequenza sia nel giorno
+  // precedente sia nel nuovo per mantenere la timeline consistente.
   recalculateDaySequence(trip, previousDayNumber);
   recalculateDaySequence(trip, stage.dayNumber);
+
+  await trip.save();
+  return { trip, stage };
+};
+
+export const deleteStageFromTrip = async (tripId, stageId, ownerId) => {
+  const trip = await getTripByIdForOwner(tripId, ownerId);
+
+  if (!trip) {
+    return { trip: null, stage: null };
+  }
+
+  const stage = trip.findStageById(stageId);
+
+  if (!stage) {
+    return { trip, stage: null };
+  }
+
+  const dayNumber = stage.dayNumber ? Number(stage.dayNumber) : null;
+  trip.stages.pull({ _id: stage._id });
+  recalculateDaySequence(trip, dayNumber);
 
   await trip.save();
   return { trip, stage };

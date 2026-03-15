@@ -149,6 +149,11 @@ export const appUpdateStageValidator = [
   body("technical.gpxUrl").optional({ values: "falsy" }).isURL().withMessage("Link GPX non valido")
 ];
 
+export const appDeleteStageValidator = [
+  ...tripIdValidator,
+  param("stageId").isMongoId().withMessage("Attivita non valida")
+];
+
 export const appAddExpenseValidator = [
   ...tripIdValidator,
   param("stageId").isMongoId().withMessage("Attivita non valida"),

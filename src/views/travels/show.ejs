@@ -111,7 +111,9 @@
                 <% if (group.dayNumber === Number.MAX_SAFE_INTEGER) { %>
                   <span class="fw-semibold">Attività senza giorno</span>
                 <% } else { %>
-                  <span class="fw-semibold">Giorno <%= group.dayNumber %></span>
+                  <% const fallbackDayDate = group.activities?.[0]?.startAt ? new Date(group.activities[0].startAt) : null; %>
+                  <% const visibleDayDate = group.dayDate || fallbackDayDate; %>
+                  <span class="fw-semibold">Giorno <%= group.dayNumber %><% if (visibleDayDate) { %> - <%= new Date(visibleDayDate).toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' }) %><% } %></span>
                 <% } %>
                 <span class="badge bg-secondary ms-2"><%= group.activities.length %></span>
               </button>
@@ -131,7 +133,12 @@
                               <% if (stage.location) { %><span class="ms-2"><i class="bi bi-geo-alt me-1"></i><%= stage.location %></span><% } %>
                             </div>
                           </div>
-                          <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#editActivity<%= stage._id %>" aria-expanded="false">Modifica</button>
+                          <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#editActivity<%= stage._id %>" aria-expanded="false">Modifica</button>
+                            <form action="/users/app/travels/<%= trip._id %>/stages/<%= stage._id %>/delete" method="POST" onsubmit="return confirm('Eliminare questa attività?')">
+                              <button class="btn btn-outline-danger btn-sm" type="submit">Elimina</button>
+                            </form>
+                          </div>
                         </div>
                         <% if (stage.description) { %><p class="text-muted small mb-3"><%= stage.description %></p><% } %>
                         <% const hasTechnical = stage.technical && (stage.technical.distanceKm != null || stage.technical.elevationGainM != null || stage.technical.movingTimeMin != null || stage.technical.difficulty || stage.technical.terrain || stage.technical.gpxUrl); %>
@@ -150,7 +157,8 @@
                         <!-- Edit activity (collapse) -->
                         <div class="collapse mb-3" id="editActivity<%= stage._id %>">
                           <div class="card card-body bg-light border-0">
-                            <form action="/users/app/travels/<%= trip._id %>/stages/<%= stage._id %>/update" method="POST" class="row g-2">
+                            <!-- form update: id univoco per collegare il bottone Salva da fuori -->
+                            <form id="updateActivity<%= stage._id %>" action="/users/app/travels/<%= trip._id %>/stages/<%= stage._id %>/update" method="POST" class="row g-2">
                               <div class="col-12 col-md-7"><label class="form-label small text-muted mb-1">Titolo</label><input class="form-control form-control-sm" name="title" value="<%= stage.title %>" required /></div>
                               <div class="col-12 col-md-5"><label class="form-label small text-muted mb-1">Tipo</label><select class="form-select form-select-sm" name="activityType"><% ['trek','visita','trasferimento','food','relax','outdoor','altro'].forEach((type) => { %><option value="<%= type %>" <%= stage.activityType === type ? 'selected' : '' %>><%= activityTypeLabels[type] || type %></option><% }) %></select></div>
                               <div class="col-12 col-md-6"><label class="form-label small text-muted mb-1">Giorno</label><input class="form-control form-control-sm" type="number" min="1" step="1" name="dayNumber" value="<%= stage.dayNumber || '' %>" /></div>
@@ -164,9 +172,37 @@
                               <div class="col-6 col-md-4"><label class="form-label small text-muted mb-1">Difficoltà</label><select class="form-select form-select-sm" name="technical[difficulty]"><option value="">Non specificata</option><% [['facile','Facile'],['media','Media'],['impegnativa','Impegnativa'],['esperto','Esperto']].forEach((item) => { %><option value="<%= item[0] %>" <%= stage.technical?.difficulty === item[0] ? 'selected' : '' %>><%= item[1] %></option><% }) %></select></div>
                               <div class="col-6 col-md-4"><label class="form-label small text-muted mb-1">Terreno</label><select class="form-select form-select-sm" name="technical[terrain]"><option value="">Non specificato</option><% [['asfalto','Asfalto'],['sterrato','Sterrato'],['sentiero','Sentiero'],['misto','Misto']].forEach((item) => { %><option value="<%= item[0] %>" <%= stage.technical?.terrain === item[0] ? 'selected' : '' %>><%= item[1] %></option><% }) %></select></div>
                               <div class="col-12 col-md-4"><label class="form-label small text-muted mb-1">Link GPX</label><input class="form-control form-control-sm" type="url" name="technical[gpxUrl]" value="<%= stage.technical?.gpxUrl || '' %>" /></div>
-                              <div class="col-12 d-flex justify-content-end gap-2">
-                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#editActivity<%= stage._id %>">Annulla</button>
-                                <button class="btn btn-dark btn-sm" type="submit">Salva</button>
+                            </form>
+                            <!-- barra azioni -->
+                            <div class="d-flex justify-content-end gap-2 mt-3">
+                              <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#editActivity<%= stage._id %>">Annulla</button>
+                              <button class="btn btn-dark btn-sm" type="submit" form="updateActivity<%= stage._id %>">Salva attività</button>
+                            </div>
+
+                            <hr class="my-3" />
+                            <p class="small text-muted mb-2">Aggiungi spesa per questa attività</p>
+                            <form action="/users/app/travels/<%= trip._id %>/stages/<%= stage._id %>/expenses" method="POST" class="row g-2">
+                              <div class="col-md-5">
+                                <label class="form-label small text-muted mb-1">Voce spesa</label>
+                                <input class="form-control form-control-sm" name="title" placeholder="Es. Pranzo rifugio" required />
+                              </div>
+                              <div class="col-md-3">
+                                <label class="form-label small text-muted mb-1">Importo</label>
+                                <input class="form-control form-control-sm" name="amount" type="number" step="0.01" min="0" placeholder="0.00" required />
+                              </div>
+                              <div class="col-md-4">
+                                <label class="form-label small text-muted mb-1">Categoria</label>
+                                <select class="form-select form-select-sm" name="category">
+                                  <option value="trasporto">Trasporto</option>
+                                  <option value="alloggio">Alloggio</option>
+                                  <option value="cibo">Cibo</option>
+                                  <option value="attivita">Attività</option>
+                                  <option value="attrezzatura">Attrezzatura</option>
+                                  <option value="altro">Altro</option>
+                                </select>
+                              </div>
+                              <div class="col-12 d-flex justify-content-end">
+                                <button class="btn btn-outline-dark btn-sm" type="submit">Salva spesa</button>
                               </div>
                             </form>
                           </div>
@@ -174,25 +210,42 @@
 
                         <!-- Expenses -->
                         <div>
-                          <p class="small fw-semibold mb-1">Spese</p>
+                          <% const stageTotalSpent = (stage.expenses || []).reduce((sum, item) => sum + Number(item.amount || 0), 0); %>
+                          <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                            <p class="small fw-semibold mb-0">Spese</p>
+                            <div class="d-flex align-items-center gap-2">
+                              <span class="badge text-bg-light border">Totale: EUR <%= stageTotalSpent.toFixed(2) %></span>
+                            </div>
+                          </div>
+
                           <% if (!stage.expenses || stage.expenses.length === 0) { %>
-                            <p class="text-muted small mb-2">Nessuna spesa.</p>
+                            <div class="border rounded p-2 mb-2 text-muted small">Nessuna spesa registrata per questa attivita.</div>
                           <% } else { %>
-                            <ul class="list-group list-group-flush mb-2">
-                              <% stage.expenses.forEach((expense) => { %>
-                                <li class="list-group-item px-0 py-1 d-flex justify-content-between align-items-center">
-                                  <span class="small"><strong><%= expense.title %></strong> <span class="text-muted">(<%= expenseCategoryLabels[expense.category] || expense.category %>)</span></span>
-                                  <span class="small">EUR <%= Number(expense.amount || 0).toFixed(2) %></span>
-                                </li>
-                              <% }) %>
-                            </ul>
+                            <div class="table-responsive mb-2">
+                              <table class="table table-sm align-middle mb-0">
+                                <thead>
+                                  <tr>
+                                    <th scope="col">Voce</th>
+                                    <th scope="col" class="text-nowrap">Categoria</th>
+                                    <th scope="col" class="text-nowrap">Data</th>
+                                    <th scope="col" class="text-end text-nowrap">Importo</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <% stage.expenses.forEach((expense) => { %>
+                                    <tr>
+                                      <td><strong><%= expense.title %></strong></td>
+                                      <td><span class="badge text-bg-secondary"><%= expenseCategoryLabels[expense.category] || expense.category %></span></td>
+                                      <td class="text-nowrap"><%= expense.paidAt ? new Date(expense.paidAt).toLocaleDateString('it-IT') : 'n/d' %></td>
+                                      <td class="text-end text-nowrap">EUR <%= Number(expense.amount || 0).toFixed(2) %></td>
+                                    </tr>
+                                  <% }) %>
+                                </tbody>
+                              </table>
+                            </div>
                           <% } %>
-                          <form action="/users/app/travels/<%= trip._id %>/stages/<%= stage._id %>/expenses" method="POST" class="row g-2">
-                            <div class="col-md-5"><input class="form-control form-control-sm" name="title" placeholder="Spesa" required /></div>
-                            <div class="col-md-3"><input class="form-control form-control-sm" name="amount" type="number" step="0.01" min="0" placeholder="0.00" required /></div>
-                            <div class="col-md-4"><select class="form-select form-select-sm" name="category"><option value="trasporto">Trasporto</option><option value="alloggio">Alloggio</option><option value="cibo">Cibo</option><option value="attivita">Attività</option><option value="attrezzatura">Attrezzatura</option><option value="altro">Altro</option></select></div>
-                            <div class="col-12"><button class="btn btn-outline-dark btn-sm" type="submit">Aggiungi spesa</button></div>
-                          </form>
+
+                          <p class="text-muted small mb-0">Per aggiungere una spesa usa il pulsante "Modifica" dell'attività.</p>
                         </div>
 
                       </div>

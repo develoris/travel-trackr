@@ -62,52 +62,83 @@ Note:
 
 ## 3.1 Trip
 
-Campi principali:
+| Campo | Tipo | Obbligatorio | Default | Note |
+| --- | --- | --- | --- | --- |
+| owner | ObjectId | Si | - | Riferimento a User, indicizzato. |
+| title | String | Si | - | Max 140, trim. |
+| description | String | No | null | Max 2000, trim. |
+| category | String enum | No | altro | escursione, trekking, visita, vacanza, roadtrip, altro. |
+| status | String enum | No | planned | planned, ongoing, completed, cancelled. |
+| startDate | Date | Si | - | Data inizio viaggio. |
+| endDate | Date | No | startDate | Se assente viene impostata uguale a startDate nel pre-validate. |
+| isMultiDay | Boolean | No | false | Ricalcolato in pre-validate: true se endDate > startDate. |
+| locationSummary | String | No | null | Max 180, trim. |
+| notes | String | No | null | Max 2000, trim. |
+| stages | Array<Stage> | No | [] | Timeline attivita embedded. |
+| createdAt | Date | Auto | auto | Timestamps Mongoose. |
+| updatedAt | Date | Auto | auto | Timestamps Mongoose. |
 
-- owner
-- title
-- description
-- category: escursione | trekking | visita | vacanza | roadtrip | altro
-- status: planned | ongoing | completed | cancelled
-- startDate
-- endDate
-- locationSummary
-- notes
-- stages[]
+Virtual stats (non salvati su DB, calcolati al volo):
 
-Virtual stats:
-
-- daysCount
-- activitiesCount
-- expensesCount
-- totalSpent
+| Campo virtuale | Tipo | Come viene calcolato |
+| --- | --- | --- |
+| daysCount | Number | Numero giorni distinti presenti nelle attivita (dayNumber esplicito o inferito da startAt). |
+| activitiesCount | Number | Lunghezza array stages. |
+| stagesCount | Number | Alias di activitiesCount. |
+| expensesCount | Number | Conteggio totale spese su tutte le attivita. |
+| totalSpent | Number | Somma importi spese, arrotondata a 2 decimali. |
 
 ## 3.2 Stage (attivita)
 
-Campi principali:
+| Campo | Tipo | Obbligatorio | Default | Note |
+| --- | --- | --- | --- | --- |
+| _id | ObjectId | Auto | auto | Id subdocument attivita. |
+| title | String | Si | - | Max 120, trim. |
+| description | String | No | null | Max 1000, trim. |
+| location | String | No | null | Max 120, trim. |
+| dayNumber | Number | No | null | Giorno logico del viaggio (>= 1). |
+| sequence | Number | No | 1 | Ordine nel giorno, ricalcolato dal service. |
+| startAt | Date | No | null | Data/ora inizio attivita. |
+| endAt | Date | No | null | Data/ora fine attivita. |
+| activityType | String enum | No | altro | trek, visita, trasferimento, food, relax, outdoor, altro. |
+| kind | String | No | null | Backward compatibility con dati vecchi/seed. |
+| parentStageId | ObjectId | No | null | Collegamento opzionale ad altra attivita. |
+| media | Array<String> | No | [] | URL/media max 500 char per item. |
+| notes | String | No | null | Max 1000, trim. |
+| technical | StageTechnical | No | {} | Blocco dati outdoor opzionale. |
+| expenses | Array<Expense> | No | [] | Spese associate alla singola attivita. |
+| createdAt | Date | Auto | auto | Timestamps Mongoose del subdocument. |
+| updatedAt | Date | Auto | auto | Timestamps Mongoose del subdocument. |
 
-- title
-- description
-- location
-- dayNumber
-- sequence
-- startAt
-- endAt
-- activityType: trek | visita | trasferimento | food | relax | outdoor | altro
-- notes
-- expenses[]
-- technical (opzionale)
+Note operative:
+
+- dayNumber puo arrivare dal form o essere inferito da startAt.
+- sequence viene mantenuta coerente per giorno (ordinamento timeline).
 
 ## 3.3 Technical (outdoor opzionale)
 
-Campi disponibili:
+| Campo | Tipo | Obbligatorio | Default | Vincoli |
+| --- | --- | --- | --- | --- |
+| distanceKm | Number | No | null | >= 0 |
+| elevationGainM | Number | No | null | >= 0 |
+| movingTimeMin | Number | No | null | >= 0 |
+| difficulty | String enum | No | null | facile, media, impegnativa, esperto |
+| terrain | String enum | No | null | asfalto, sterrato, sentiero, misto |
+| gpxUrl | String | No | null | Max 500, trim |
 
-- distanceKm (>= 0)
-- elevationGainM (>= 0)
-- movingTimeMin (>= 0)
-- difficulty: facile | media | impegnativa | esperto
-- terrain: asfalto | sterrato | sentiero | misto
-- gpxUrl
+## 3.4 Expense (spesa)
+
+| Campo | Tipo | Obbligatorio | Default | Vincoli |
+| --- | --- | --- | --- | --- |
+| _id | ObjectId | Auto | auto | Id subdocument spesa |
+| title | String | Si | - | Max 120, trim |
+| amount | Number | Si | - | >= 0 |
+| currency | String | No | EUR | Uppercase, lunghezza 3 |
+| category | String enum | No | altro | trasporto, alloggio, cibo, attivita, attrezzatura, altro |
+| paidAt | Date | No | now | Data pagamento |
+| notes | String | No | null | Max 500, trim |
+| createdAt | Date | Auto | auto | Timestamps Mongoose del subdocument |
+| updatedAt | Date | Auto | auto | Timestamps Mongoose del subdocument |
 
 Comportamento:
 
@@ -128,6 +159,24 @@ Funzioni chiave:
    - giorno esistente oppure nuovo giorno automatico.
 4. Parsing technical:
    - accetta payload annidato technical[...] e normalizza numeri/stringhe.
+
+### 4.1 Regole "nuovo giorno" (dayMode)
+
+Quando aggiungi una attivita dalla UI, il service applica questo ordine:
+
+1. Se arriva dayNumber (o existingDayNumber), usa quel giorno.
+2. Se dayMode = new, calcola automaticamente il prossimo giorno disponibile:
+   - `nextDay = max(dayNumber presenti) + 1`
+3. Se non c'e un giorno esplicito ma c'e startAt, prova a inferire il giorno da startDate del viaggio.
+4. Se e presente solo startTime (HH:mm), costruisce startAt combinando:
+   - data = startDate + (dayNumber - 1)
+   - ora = startTime
+
+Perche questa logica:
+
+- evita buchi/duplicazioni quando si crea un "nuovo giorno" dalla UI
+- mantiene la timeline consistente anche con input parziali
+- garantisce un ordinamento stabile nel giorno tramite ricalcolo sequence
 
 ## 5. PDF report
 
