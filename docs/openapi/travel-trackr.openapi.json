@@ -767,6 +767,52 @@
         }
       }
     },
+    "/users/travels/{tripId}/stages/{stageId}": {
+      "delete": {
+        "tags": [
+          "Travels"
+        ],
+        "summary": "Elimina attivita (stage) dal viaggio",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tripId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stageId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Attivita eliminata"
+          },
+          "404": {
+            "description": "Viaggio o attivita non trovati",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/users/travels/{tripId}/stages/{stageId}/expenses": {
       "post": {
         "tags": [

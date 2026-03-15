@@ -1,7 +1,7 @@
 <!-- Modal per creazione nuova attivita -->
 <% const activityTypeLabels = { trek: 'Trek', visita: 'Visita', trasferimento: 'Trasferimento', food: 'Cibo', relax: 'Relax', outdoor: 'Outdoor', altro: 'Altro' }; %>
 <div class="modal fade" id="newActivityModal" tabindex="-1" aria-labelledby="newActivityModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="newActivityModalLabel">Nuova attività</h5>
@@ -24,7 +24,7 @@
           </div>
           <div class="col-12">
             <label class="form-label small text-muted mb-1">Dove inserirla</label>
-            <div class="d-flex gap-4">
+            <div class="d-flex flex-column flex-sm-row gap-2 gap-sm-4">
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="dayMode" id="modalDayModeExisting" value="existing" <%= (dayOptions && dayOptions.length > 0) ? 'checked' : '' %> />
                 <label class="form-check-label" for="modalDayModeExisting">Giorno esistente</label>
@@ -104,8 +104,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-        <button type="submit" form="newActivityForm" class="btn btn-dark">Aggiungi attività</button>
+        <button type="button" class="btn btn-secondary mobile-btn-block" data-bs-dismiss="modal">Annulla</button>
+        <button type="submit" form="newActivityForm" class="btn btn-dark mobile-btn-block">Aggiungi attività</button>
       </div>
     </div>
   </div>

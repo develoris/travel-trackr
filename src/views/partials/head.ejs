@@ -24,4 +24,29 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   }
+  .mobile-btn-block {
+    width: 100%;
+  }
+  .navbar-user-name {
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: bottom;
+  }
+  @media (min-width: 576px) {
+    .mobile-btn-block {
+      width: auto;
+    }
+  }
+  @media (max-width: 575.98px) {
+    .card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    .navbar-user-name {
+      max-width: 150px;
+    }
+  }
 </style>

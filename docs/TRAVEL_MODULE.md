@@ -35,6 +35,7 @@ Router montato sotto prefisso /users.
 - POST /users/app/travels/:tripId/update
 - POST /users/app/travels/:tripId/stages
 - POST /users/app/travels/:tripId/stages/:stageId/update
+- POST /users/app/travels/:tripId/stages/:stageId/delete
 - POST /users/app/travels/:tripId/stages/:stageId/expenses
 - POST /users/app/travels/:tripId/delete
 
@@ -219,10 +220,37 @@ Comportamenti UX:
 - lista viaggi paginata e filtrabile
 - dettaglio viaggio per giorni con accordion
 - creazione/modifica attivita inline
+- eliminazione attivita e viaggio con azioni dedicate lato UI
 - gestione spese per singola attivita
 - inserimento dati technical nel form attivita
 
-## 8. Seed mock
+## 8. Test automatici
+
+Documentazione estesa: tests/README.md
+
+La suite e separata per livello, in modo da avere feedback rapido sui pezzi piccoli e copertura realistica sui flussi completi.
+
+Struttura:
+
+- tests/unit: protegge logica isolata del modulo, per esempio virtual e helper del model.
+- tests/integration: verifica service + model + Mongo in-memory.
+- tests/e2e: verifica flussi reali HTTP/web tramite Express e sessione.
+
+Copertura attuale rilevante per il modulo travel:
+
+- calcolo virtual `stats` del trip;
+- lookup di una stage embedded con `findStageById`;
+- delete stage nel service con riallineamento di `sequence`;
+- flusso web completo login -> crea viaggio -> aggiungi stage -> elimina stage.
+
+Perche e importante:
+
+- la delete stage non e solo rimozione dati, ma anche coerenza della timeline per giorno;
+- i test unit proteggono la logica piu economica da eseguire;
+- i test integration proteggono il comportamento con Mongoose;
+- i test e2e proteggono il flusso davvero usato dall'utente finale.
+
+## 9. Seed mock
 
 File: src/scripts/seed-mock-data.js
 
@@ -235,9 +263,9 @@ Il seed include vari scenari utili per QA:
 
 Il seed e idempotente per owner + title.
 
-## 9. Estensioni consigliate
+## 10. Estensioni consigliate
 
 1. Multilingua label UI (i18n) con dizionari per lingua.
 2. API update stage/delete stage anche su canale REST.
-3. Test automatici service + validator del modulo travel.
+3. Coverage aggiuntiva su validator travel e casi errore web/API.
 4. Metriche aggregate outdoor per giorno/viaggio (km, dislivello, moving time).
