@@ -4,11 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "start:mock": "node src/scripts/start-mock.js",
-    "backup:db": "node src/scripts/backup-db.js",
-    "backup:cron": "node src/scripts/backup-cron.js",
-    "openapi:export-json": "node src/scripts/export-openapi-json.js",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "start:mock": "tsx src/scripts/start-mock.ts",
+    "backup:db": "tsx src/scripts/backup-db.ts",
+    "backup:cron": "tsx src/scripts/backup-cron.ts",
+    "openapi:export-json": "tsx src/scripts/export-openapi-json.ts",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
     "test:unit": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/unit",
     "test:integration": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/integration",
@@ -38,7 +40,23 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^5.0.6",
+    "@types/express-session": "^1.18.2",
+    "@types/jest": "^30.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.5.0",
+    "@types/pdfkit": "^0.17.5",
+    "@types/supertest": "^7.2.0",
+    "@types/swagger-ui-express": "^4.1.8",
     "jest": "^30.3.0",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
