@@ -72,6 +72,11 @@ export const addExpenseValidator = [
   body("notes").optional({ values: "falsy" }).isString().isLength({ max: 500 })
 ];
 
+export const deleteStageValidator = [
+  ...tripIdValidator,
+  param("stageId").isMongoId().withMessage("stageId non valido")
+];
+
 export const appCreateTripValidator = [
   body("title").trim().notEmpty().withMessage("Titolo obbligatorio").isLength({ max: 140 }),
   body("startDate").notEmpty().withMessage("Data inizio obbligatoria").isISO8601(),
@@ -147,6 +152,11 @@ export const appUpdateStageValidator = [
   body("technical.difficulty").optional({ values: "falsy" }).isIn(stageDifficultyLevels).withMessage("Difficolta non valida"),
   body("technical.terrain").optional({ values: "falsy" }).isIn(stageTerrains).withMessage("Terreno non valido"),
   body("technical.gpxUrl").optional({ values: "falsy" }).isURL().withMessage("Link GPX non valido")
+];
+
+export const appDeleteStageValidator = [
+  ...tripIdValidator,
+  param("stageId").isMongoId().withMessage("Attivita non valida")
 ];
 
 export const appAddExpenseValidator = [

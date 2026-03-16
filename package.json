@@ -9,7 +9,10 @@
     "backup:db": "node src/scripts/backup-db.js",
     "backup:cron": "node src/scripts/backup-cron.js",
     "openapi:export-json": "node src/scripts/export-openapi-json.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
+    "test:unit": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/unit",
+    "test:integration": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/integration",
+    "test:e2e": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/e2e"
   },
   "keywords": [],
   "author": "",
@@ -33,5 +36,9 @@
     "node-cron": "^4.2.1",
     "pdfkit": "^0.17.2",
     "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2"
   }
 }

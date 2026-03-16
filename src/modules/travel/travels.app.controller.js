@@ -2,6 +2,7 @@ import {
   addExpenseToStage,
   addStageToTrip,
   createTripForOwner,
+  deleteStageFromTrip,
   deleteTripForOwner,
   getTripByIdForOwner,
   listTripsByOwnerPaged,
@@ -155,6 +156,28 @@ const ensurePdfSpace = (doc, minSpace = 70) => {
   }
 };
 
+const getCalendarDateForDayNumber = (tripStartDate, dayNumber) => {
+  const normalizedDayNumber = Number(dayNumber);
+
+  if (
+    !tripStartDate ||
+    !Number.isInteger(normalizedDayNumber) ||
+    normalizedDayNumber < 1 ||
+    normalizedDayNumber === Number.MAX_SAFE_INTEGER
+  ) {
+    return null;
+  }
+
+  const baseDate = startOfDay(tripStartDate);
+
+  if (!baseDate) {
+    return null;
+  }
+
+  baseDate.setDate(baseDate.getDate() + (normalizedDayNumber - 1));
+  return baseDate;
+};
+
 const buildStageTimeline = (trip) => {
   const stages = [...(trip.stages || [])].map((stage) => {
     const inferredDay = inferDayNumber(trip.startDate, stage.startAt);
@@ -200,15 +223,18 @@ const buildStageTimeline = (trip) => {
   });
 };
 
-const buildDayGroups = (stageTimeline) => {
+const buildDayGroups = (stageTimeline, tripStartDate) => {
   const groupsMap = new Map();
 
   for (const activity of stageTimeline) {
     const dayKey = activity.timelineDayNumber;
 
     if (!groupsMap.has(dayKey)) {
+      const dayDate = getCalendarDateForDayNumber(tripStartDate, dayKey);
+
       groupsMap.set(dayKey, {
         dayNumber: dayKey,
+        dayDate,
         activities: []
       });
     }
@@ -315,7 +341,7 @@ export const getAppTravelDetail = async (req, res) => {
   }
 
   const stageTimeline = sortStageTimelineByDayAndTime(buildStageTimeline(trip));
-  const dayGroups = buildDayGroups(stageTimeline);
+  const dayGroups = buildDayGroups(stageTimeline, trip.startDate);
   const dayOptions = dayGroups
     .map((group) => group.dayNumber)
     .filter((dayNumber) => Number(dayNumber) !== Number.MAX_SAFE_INTEGER);
@@ -343,7 +369,7 @@ export const getAppTravelReportPdf = async (req, res) => {
   }
 
   const stageTimeline = sortStageTimelineByDayAndTime(buildStageTimeline(trip));
-  const dayGroups = buildDayGroups(stageTimeline);
+  const dayGroups = buildDayGroups(stageTimeline, trip.startDate);
   const generatedAt = new Date();
   const safeTitle = normalizeFileName(trip.title);
   const stamp = generatedAt.toISOString().replace(/[:.]/g, "-");
@@ -541,7 +567,7 @@ export const getAppTravelReportPdf = async (req, res) => {
 
     const dayLabel = group.dayNumber === Number.MAX_SAFE_INTEGER
       ? "Senza giorno assegnato"
-      : `Giorno ${group.dayNumber}`;
+      : `Giorno ${group.dayNumber}${group.dayDate ? ` (${formatDate(group.dayDate)})` : ""}`;
     const daySpent = group.activities.reduce((sum, activity) => sum + getStageSpent(activity), 0);
 
     const dayHeaderY = doc.y;
@@ -738,6 +764,35 @@ export const postAppTravelExpense = async (req, res) => {
   }
 
   setFlash(req, "success", "Spesa aggiunta all'attivita.");
+  return res.redirect(`/users/app/travels/${req.params.tripId}`);
+};
+
+export const postAppDeleteTravelStage = async (req, res) => {
+  const result = await deleteStageFromTrip(
+    req.params.tripId,
+    req.params.stageId,
+    getWebUserId(req)
+  );
+
+  if (!result.trip) {
+    throw new AppError({
+      code: "TRIP_NOT_FOUND",
+      status: 404,
+      userMessage: "Viaggio non trovato.",
+      redirectTo: "/users/app/travels"
+    });
+  }
+
+  if (!result.stage) {
+    throw new AppError({
+      code: "STAGE_NOT_FOUND",
+      status: 404,
+      userMessage: "Attivita non trovata.",
+      redirectTo: `/users/app/travels/${req.params.tripId}`
+    });
+  }
+
+  setFlash(req, "success", "Attivita eliminata.");
   return res.redirect(`/users/app/travels/${req.params.tripId}`);
 };
 

@@ -13,8 +13,12 @@ import { createOpenApiRouter } from "../openapi/openapi.router.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export const createApp = ({ mongoUrl, isProduction }) => {
+export const createApp = ({ mongoUrl, isProduction, sessionStore }) => {
   const app = express();
+  const resolvedSessionStore = sessionStore || MongoStore.create({
+    mongoUrl,
+    ttl: 60 * 60 * 24 * 30
+  });
 
   app.use(cors({
     origin: process.env.CORS_ORIGIN || "http://localhost:5173",
@@ -34,10 +38,7 @@ export const createApp = ({ mongoUrl, isProduction }) => {
       secret: process.env.SESSION_SECRET || "dev-session-secret",
       resave: false,
       saveUninitialized: false,
-      store: MongoStore.create({
-        mongoUrl,
-        ttl: 60 * 60 * 24 * 30
-      }),
+      store: resolvedSessionStore,
       cookie: {
         httpOnly: true,
         secure: isProduction,

@@ -49,6 +49,13 @@ router.post(
   asyncHandler(app.postAppUpdateTravelStage)
 );
 router.post(
+  "/app/travels/:tripId/stages/:stageId/delete",
+  app.requireWebAuth,
+  v.appDeleteStageValidator,
+  v.validateWebRequest("/users/app/travels"),
+  asyncHandler(app.postAppDeleteTravelStage)
+);
+router.post(
   "/app/travels/:tripId/stages/:stageId/expenses",
   app.requireWebAuth,
   v.appAddExpenseValidator,
@@ -87,6 +94,13 @@ router.post(
   v.addStageValidator,
   v.validateRequest,
   asyncHandler(api.postStage)
+);
+router.delete(
+  "/travels/:tripId/stages/:stageId",
+  authenticate,
+  v.deleteStageValidator,
+  v.validateRequest,
+  asyncHandler(api.removeStage)
 );
 router.post(
   "/travels/:tripId/stages/:stageId/expenses",
