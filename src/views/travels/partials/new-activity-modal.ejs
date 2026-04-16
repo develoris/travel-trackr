@@ -1,4 +1,5 @@
 <!-- Modal per creazione nuova attivita -->
+<% const bp = basePath || ''; %>
 <% const activityTypeLabels = { trek: 'Trek', visita: 'Visita', trasferimento: 'Trasferimento', food: 'Cibo', relax: 'Relax', outdoor: 'Outdoor', altro: 'Altro' }; %>
 <div class="modal fade" id="newActivityModal" tabindex="-1" aria-labelledby="newActivityModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
@@ -9,7 +10,7 @@
       </div>
       <div class="modal-body">
         <p class="text-muted small">Scegli un giorno esistente o creane uno nuovo. L'ordine è automatico in base all'orario di inizio.</p>
-        <form action="/users/app/travels/<%= trip._id %>/stages" method="POST" id="newActivityForm" class="row g-3">
+        <form action="<%= bp %>/users/app/travels/<%= trip._id %>/stages" method="POST" id="newActivityForm" class="row g-3">
           <div class="col-12 col-md-8">
             <label class="form-label small text-muted mb-1">Titolo attività</label>
             <input class="form-control" name="title" required />

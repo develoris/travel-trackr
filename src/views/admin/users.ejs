@@ -4,6 +4,7 @@
   <%- include("../partials/head", { title: "Gestione utenti" }) %>
 </head>
 <body class="d-flex flex-column min-vh-100">
+  <% const bp = basePath || ''; %>
   <%- include("../partials/navbar", { user }) %>
 
   <main class="flex-grow-1 py-4 py-md-5">
@@ -22,7 +23,7 @@
       <div class="card mb-4">
         <div class="card-body">
           <h2 class="h5 mb-3">Nuova utenza</h2>
-          <form method="POST" action="/users/app/admin/users" class="row g-3">
+          <form method="POST" action="<%= bp %>/users/app/admin/users" class="row g-3">
             <div class="col-12 col-md-4">
               <label class="form-label">Email</label>
               <input type="email" name="email" class="form-control" required />
@@ -96,15 +97,15 @@
                       <% if (String(user._id) !== String(u._id)) { %>
                         <div class="d-inline-flex gap-1">
                           <% if (u.isBlocked) { %>
-                            <form action="/users/app/admin/users/<%= u._id %>/unblock" method="POST" class="d-inline">
+                            <form action="<%= bp %>/users/app/admin/users/<%= u._id %>/unblock" method="POST" class="d-inline">
                               <button class="btn btn-outline-success btn-sm" type="submit">Sblocca</button>
                             </form>
                           <% } else { %>
-                            <form action="/users/app/admin/users/<%= u._id %>/block" method="POST" class="d-inline">
+                            <form action="<%= bp %>/users/app/admin/users/<%= u._id %>/block" method="POST" class="d-inline">
                               <button class="btn btn-outline-warning btn-sm" type="submit">Blocca</button>
                             </form>
                           <% } %>
-                          <form action="/users/app/admin/users/<%= u._id %>/delete" method="POST" class="d-inline" onsubmit="return confirm('Eliminare questa utenza?');">
+                          <form action="<%= bp %>/users/app/admin/users/<%= u._id %>/delete" method="POST" class="d-inline" onsubmit="return confirm('Eliminare questa utenza?');">
                             <button class="btn btn-outline-danger btn-sm" type="submit">Elimina</button>
                           </form>
                         </div>

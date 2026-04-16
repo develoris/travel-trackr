@@ -4,6 +4,7 @@
   <%- include("../partials/head", { title: "Mio profilo" }) %>
 </head>
 <body class="d-flex flex-column min-vh-100">
+  <% const bp = basePath || ''; %>
   <%- include("../partials/navbar", { user }) %>
 
   <main class="flex-grow-1 py-4 py-md-5">
@@ -29,7 +30,7 @@
           <div class="card">
             <div class="card-header">Menu account</div>
             <div class="list-group list-group-flush">
-              <a href="/users/app/profile" class="list-group-item list-group-item-action <%= currentPath === '/users/app/profile' ? 'active' : '' %>">
+              <a href="<%= bp %>/users/app/profile" class="list-group-item list-group-item-action <%= currentPath === '/users/app/profile' ? 'active' : '' %>">
                 <i class="bi bi-key me-2"></i>Cambia password
               </a>
               <span class="list-group-item text-muted">
@@ -47,7 +48,7 @@
           <div class="card">
             <div class="card-body">
               <h2 class="h5 mb-3">Cambio password</h2>
-              <form method="POST" action="/users/app/profile/password" class="row g-3">
+              <form method="POST" action="<%= bp %>/users/app/profile/password" class="row g-3">
                 <% if (!user.mustChangePassword) { %>
                   <div class="col-12">
                     <label class="form-label">Password corrente</label>

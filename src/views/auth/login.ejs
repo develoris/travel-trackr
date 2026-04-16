@@ -4,6 +4,7 @@
   <%- include("../partials/head", { title: "Accedi" }) %>
 </head>
 <body class="d-flex flex-column min-vh-100">
+  <% const bp = basePath || ''; %>
 
   <%- include("../partials/navbar", { user: null }) %>
 
@@ -22,7 +23,7 @@
 
           <div class="card shadow-sm border-0">
             <div class="card-body p-4">
-              <form action="/users/app/login" method="POST" novalidate>
+              <form action="<%= bp %>/users/app/login" method="POST" novalidate>
                 <div class="mb-3">
                   <label for="email" class="form-label fw-semibold">Email</label>
                   <div class="input-group">

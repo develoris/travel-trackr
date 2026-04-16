@@ -4,6 +4,7 @@
   <%- include("../partials/head", { title: "I miei viaggi" }) %>
 </head>
 <body class="d-flex flex-column min-vh-100">
+  <% const bp = basePath || ''; %>
   <%- include("../partials/navbar", { user }) %>
 
   <main class="flex-grow-1 py-3 py-md-5">
@@ -19,7 +20,7 @@
             <h1 class="h3 fw-bold mb-2">I tuoi viaggi</h1>
             <p class="text-muted mb-0">Filtra, ordina e sfoglia senza caos anche con tanti viaggi.</p>
           </div>
-          <a href="/users/app/travels/new" class="btn btn-dark fw-semibold mobile-btn-block text-sm-nowrap">
+          <a href="<%= bp %>/users/app/travels/new" class="btn btn-dark fw-semibold mobile-btn-block text-sm-nowrap">
             <i class="bi bi-plus-lg me-1"></i>Nuovo viaggio
           </a>
         </div>
@@ -27,7 +28,7 @@
 
       <div class="card mb-4">
         <div class="card-body">
-          <form method="GET" action="/users/app/travels" class="row g-2 align-items-end">
+          <form method="GET" action="<%= bp %>/users/app/travels" class="row g-2 align-items-end">
             <div class="col-12 col-md-3">
               <label class="form-label small text-muted mb-1">Stato</label>
               <select class="form-select" name="status">
@@ -95,7 +96,7 @@
                     <li><i class="bi bi-list-check me-1"></i><%= trip.stats?.activitiesCount || 0 %> attività</li>
                     <li><i class="bi bi-cash-stack me-1"></i>EUR <%= Number(trip.stats?.totalSpent || 0).toFixed(2) %></li>
                   </ul>
-                  <a href="/users/app/travels/<%= trip._id %>" class="btn btn-outline-dark btn-sm mt-auto">Apri dettaglio</a>
+                  <a href="<%= bp %>/users/app/travels/<%= trip._id %>" class="btn btn-outline-dark btn-sm mt-auto">Apri dettaglio</a>
                 </div>
               </div>
             </div>
@@ -106,13 +107,13 @@
           <nav aria-label="Paginazione viaggi" class="mt-4">
             <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap gap-1">
               <li class="page-item <%= pagination.hasPrev ? '' : 'disabled' %>">
-                <a class="page-link" href="/users/app/travels?page=<%= pagination.page - 1 %>&limit=<%= pagination.limit %>&sort=<%= filters?.sort || 'startDateDesc' %>&status=<%= encodeURIComponent(filters?.status || '') %>&category=<%= encodeURIComponent(filters?.category || '') %>">Precedente</a>
+                <a class="page-link" href="<%= bp %>/users/app/travels?page=<%= pagination.page - 1 %>&limit=<%= pagination.limit %>&sort=<%= filters?.sort || 'startDateDesc' %>&status=<%= encodeURIComponent(filters?.status || '') %>&category=<%= encodeURIComponent(filters?.category || '') %>">Precedente</a>
               </li>
               <li class="page-item disabled">
                 <span class="page-link">Pagina <%= pagination.page %> di <%= pagination.totalPages %></span>
               </li>
               <li class="page-item <%= pagination.hasNext ? '' : 'disabled' %>">
-                <a class="page-link" href="/users/app/travels?page=<%= pagination.page + 1 %>&limit=<%= pagination.limit %>&sort=<%= filters?.sort || 'startDateDesc' %>&status=<%= encodeURIComponent(filters?.status || '') %>&category=<%= encodeURIComponent(filters?.category || '') %>">Successiva</a>
+                <a class="page-link" href="<%= bp %>/users/app/travels?page=<%= pagination.page + 1 %>&limit=<%= pagination.limit %>&sort=<%= filters?.sort || 'startDateDesc' %>&status=<%= encodeURIComponent(filters?.status || '') %>&category=<%= encodeURIComponent(filters?.category || '') %>">Successiva</a>
               </li>
             </ul>
           </nav>

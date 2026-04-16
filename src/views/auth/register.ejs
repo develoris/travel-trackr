@@ -4,6 +4,7 @@
   <%- include("../partials/head", { title: "Registrazione disabilitata" }) %>
 </head>
 <body class="d-flex flex-column min-vh-100">
+  <% const bp = basePath || ''; %>
 
   <%- include("../partials/navbar", { user: null }) %>
 
@@ -18,7 +19,7 @@
               <p class="text-muted mb-4">
                 Gli account vengono creati solo da un amministratore con password temporanea.
               </p>
-              <a href="/users/app/login" class="btn btn-primary">Vai al login</a>
+              <a href="<%= bp %>/users/app/login" class="btn btn-primary">Vai al login</a>
             </div>
           </div>
         </div>

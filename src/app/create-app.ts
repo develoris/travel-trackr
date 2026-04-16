@@ -66,7 +66,7 @@ export const createApp = ({
   sessionStore
 }: CreateAppOptions): Express => {
   const app = express();
-  const basePath = normalizeBasePath(process.env.APP_BASE_PATH);
+  const configuredBasePath = normalizeBasePath(process.env.APP_BASE_PATH);
 
   const resolvedSessionStore =
     sessionStore ||
@@ -87,6 +87,9 @@ export const createApp = ({
   app.use(express.urlencoded({ extended: true }));
 
   app.use((req, res, next) => {
+    const headerPrefix = req.header("x-forwarded-prefix");
+    const requestBasePath = normalizeBasePath(headerPrefix || configuredBasePath);
+
     const originalRedirect = res.redirect.bind(res);
     const patchedRedirect: typeof res.redirect = ((
       statusOrUrl: number | string,
@@ -95,10 +98,10 @@ export const createApp = ({
       if (typeof statusOrUrl === "number") {
         return originalRedirect(
           statusOrUrl,
-          prefixBasePath(maybeUrl || "/", basePath)
+          prefixBasePath(maybeUrl || "/", requestBasePath)
         );
       }
-      return originalRedirect(prefixBasePath(statusOrUrl, basePath));
+      return originalRedirect(prefixBasePath(statusOrUrl, requestBasePath));
     }) as typeof res.redirect;
 
     res.redirect = patchedRedirect;
@@ -107,18 +110,21 @@ export const createApp = ({
     const patchedSend: typeof res.send = ((body?: unknown) => {
       const contentType = res.getHeader("Content-Type")?.toString() || "";
       if (typeof body === "string" && contentType.includes("text/html")) {
-        return originalSend(rewriteHtmlAbsoluteUrls(body, basePath));
+        return originalSend(rewriteHtmlAbsoluteUrls(body, requestBasePath));
       }
       return originalSend(body as never);
     }) as typeof res.send;
 
     res.send = patchedSend;
+    res.locals.basePath = requestBasePath;
     next();
   });
 
   const setCurrentPath: RequestHandler = (req, res, next) => {
     res.locals.currentPath = req.path;
-    res.locals.basePath = basePath;
+    if (typeof res.locals.basePath === "undefined") {
+      res.locals.basePath = configuredBasePath;
+    }
     next();
   };
   app.use(setCurrentPath);

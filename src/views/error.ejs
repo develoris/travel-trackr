@@ -4,6 +4,7 @@
   <%- include("partials/head", { title: "Errore" }) %>
 </head>
 <body class="d-flex flex-column min-vh-100">
+  <% const bp = basePath || ''; %>
   <%- include("partials/navbar", { user: null }) %>
 
   <main class="flex-grow-1 d-flex align-items-center py-5">
@@ -20,7 +21,7 @@
               <p class="small text-muted mb-4">
                 Codice: <strong><%= status %></strong> · Request ID: <strong><%= requestId %></strong>
               </p>
-              <a href="/users/app" class="btn btn-primary">Torna alla home</a>
+              <a href="<%= bp %>/users/app" class="btn btn-primary">Torna alla home</a>
             </div>
           </div>
         </div>
