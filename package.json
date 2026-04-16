@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "build": "tsc && node scripts/copy-views.mjs",
+    "start": "node dist/src/index.js",
     "dev": "tsx src/index.ts",
     "start:mock": "tsx src/scripts/start-mock.ts",
+    "seed:default-admin": "tsx src/scripts/seed-default-admin.ts",
     "backup:db": "tsx src/scripts/backup-db.ts",
     "backup:cron": "tsx src/scripts/backup-cron.ts",
     "openapi:export-json": "tsx src/scripts/export-openapi-json.ts",

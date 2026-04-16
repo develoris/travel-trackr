@@ -48,6 +48,18 @@ In modalita mock vengono creati automaticamente utenti demo (idempotenti):
 - email: `demo.user@travel-trackr.local` - password: `Password123!`
 - email: `demo.admin@travel-trackr.local` - password: `Password123!`
 
+Per creare un admin di default in modo one-shot (solo se non esiste gia):
+
+```bash
+npm run seed:default-admin
+```
+
+Variabili opzionali per il comando one-shot:
+
+- `DEFAULT_ADMIN_EMAIL` (default: `admin@travel-trackr.local`)
+- `DEFAULT_ADMIN_PASSWORD` (default: `ChangeMe123!`)
+- `DEFAULT_ADMIN_NAME` (default: `Default Admin`)
+
 Per disattivare il seed automatico imposta `SEED_MOCK_DATA=false`.
 
 I mock includono piu scenari travel (planned/ongoing/completed/cancelled, con e senza attivita, con dati tecnici outdoor completi/parziali).

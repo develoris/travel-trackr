@@ -1,5 +1,6 @@
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { existsSync } from "fs";
 import express, { type Express, type RequestHandler } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -13,11 +14,51 @@ import { createOpenApiRouter } from "../openapi/openapi.router.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+const resolveViewsPath = (): string => {
+  const compiledViewsPath = join(__dirname, "../views");
+  if (existsSync(compiledViewsPath)) {
+    return compiledViewsPath;
+  }
+
+  return join(process.cwd(), "src", "views");
+};
+
 interface CreateAppOptions {
   mongoUrl: string;
   isProduction: boolean;
   sessionStore?: session.Store;
 }
+
+const normalizeBasePath = (value?: string): string => {
+  if (!value) return "";
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "/") return "";
+  const withLeadingSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return withLeadingSlash.replace(/\/+$/, "");
+};
+
+const shouldPrefixWithBasePath = (url: string, basePath: string): boolean => {
+  if (!basePath) return false;
+  if (!url.startsWith("/")) return false;
+  if (url.startsWith("//")) return false;
+  if (url.startsWith(`${basePath}/`) || url === basePath) return false;
+  return true;
+};
+
+const prefixBasePath = (url: string, basePath: string): string => {
+  if (!shouldPrefixWithBasePath(url, basePath)) return url;
+  return `${basePath}${url}`;
+};
+
+const rewriteHtmlAbsoluteUrls = (html: string, basePath: string): string => {
+  if (!basePath) return html;
+
+  return html.replace(
+    /(href|src|action)=("|')(\/[^"']*)(\2)/gi,
+    (_match, attr, quoteStart, path, quoteEnd) =>
+      `${attr}=${quoteStart}${prefixBasePath(path, basePath)}${quoteEnd}`
+  );
+};
 
 export const createApp = ({
   mongoUrl,
@@ -25,6 +66,7 @@ export const createApp = ({
   sessionStore
 }: CreateAppOptions): Express => {
   const app = express();
+  const basePath = normalizeBasePath(process.env.APP_BASE_PATH);
 
   const resolvedSessionStore =
     sessionStore ||
@@ -44,8 +86,39 @@ export const createApp = ({
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  app.use((req, res, next) => {
+    const originalRedirect = res.redirect.bind(res);
+    const patchedRedirect: typeof res.redirect = ((
+      statusOrUrl: number | string,
+      maybeUrl?: string
+    ) => {
+      if (typeof statusOrUrl === "number") {
+        return originalRedirect(
+          statusOrUrl,
+          prefixBasePath(maybeUrl || "/", basePath)
+        );
+      }
+      return originalRedirect(prefixBasePath(statusOrUrl, basePath));
+    }) as typeof res.redirect;
+
+    res.redirect = patchedRedirect;
+
+    const originalSend = res.send.bind(res);
+    const patchedSend: typeof res.send = ((body?: unknown) => {
+      const contentType = res.getHeader("Content-Type")?.toString() || "";
+      if (typeof body === "string" && contentType.includes("text/html")) {
+        return originalSend(rewriteHtmlAbsoluteUrls(body, basePath));
+      }
+      return originalSend(body as never);
+    }) as typeof res.send;
+
+    res.send = patchedSend;
+    next();
+  });
+
   const setCurrentPath: RequestHandler = (req, res, next) => {
     res.locals.currentPath = req.path;
+    res.locals.basePath = basePath;
     next();
   };
   app.use(setCurrentPath);
@@ -67,7 +140,7 @@ export const createApp = ({
   );
 
   app.set("view engine", "ejs");
-  app.set("views", join(__dirname, "../views"));
+  app.set("views", resolveViewsPath());
 
   app.use("/api-docs", createOpenApiRouter());
   app.get("/", (_req, res) => res.redirect("/users/app"));
