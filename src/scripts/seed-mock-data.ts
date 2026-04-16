@@ -51,13 +51,13 @@ interface MockTrip {
 
 const MOCK_USERS: MockUser[] = [
   {
-    email: "demo.user@travel-trackr.local",
+    email: "demo.user@example.com",
     password: "Password123!",
     name: "Demo User",
     role: "user"
   },
   {
-    email: "demo.admin@travel-trackr.local",
+    email: "demo.admin@example.com",
     password: "Password123!",
     name: "Demo Admin",
     role: "admin"
@@ -68,7 +68,7 @@ const shouldSeedMockData = () => process.env.SEED_MOCK_DATA !== "false";
 
 const DEMO_TRIPS: MockTrip[] = [
   {
-    ownerEmail: "demo.user@travel-trackr.local",
+    ownerEmail: "demo.user@example.com",
     title: "Weekend Dolomiti",
     category: "trekking",
     status: "completed",
@@ -130,7 +130,7 @@ const DEMO_TRIPS: MockTrip[] = [
     ]
   },
   {
-    ownerEmail: "demo.admin@travel-trackr.local",
+    ownerEmail: "demo.admin@example.com",
     title: "Milano culturale",
     category: "visita",
     status: "planned",
@@ -156,7 +156,7 @@ const DEMO_TRIPS: MockTrip[] = [
     ]
   },
   {
-    ownerEmail: "demo.user@travel-trackr.local",
+    ownerEmail: "demo.user@example.com",
     title: "Bikepack Langhe 2 giorni",
     category: "roadtrip",
     status: "ongoing",
@@ -218,7 +218,7 @@ const DEMO_TRIPS: MockTrip[] = [
     ]
   },
   {
-    ownerEmail: "demo.user@travel-trackr.local",
+    ownerEmail: "demo.user@example.com",
     title: "Sardegna estate",
     category: "vacanza",
     status: "planned",
@@ -230,7 +230,7 @@ const DEMO_TRIPS: MockTrip[] = [
     stages: []
   },
   {
-    ownerEmail: "demo.user@travel-trackr.local",
+    ownerEmail: "demo.user@example.com",
     title: "Escursione Monte Grappa",
     category: "escursione",
     status: "completed",
@@ -292,7 +292,7 @@ const DEMO_TRIPS: MockTrip[] = [
     ]
   },
   {
-    ownerEmail: "demo.user@travel-trackr.local",
+    ownerEmail: "demo.user@example.com",
     title: "Roadtrip Sicilia",
     category: "roadtrip",
     status: "cancelled",
@@ -331,7 +331,7 @@ const DEMO_TRIPS: MockTrip[] = [
     ]
   },
   {
-    ownerEmail: "demo.user@travel-trackr.local",
+    ownerEmail: "demo.user@example.com",
     title: "Alta Via 1 Dolomiti",
     category: "trekking",
     status: "planned",
@@ -396,7 +396,7 @@ const DEMO_TRIPS: MockTrip[] = [
     ]
   },
   {
-    ownerEmail: "demo.admin@travel-trackr.local",
+    ownerEmail: "demo.admin@example.com",
     title: "Barcellona long weekend",
     category: "visita",
     status: "completed",
@@ -475,7 +475,7 @@ const DEMO_TRIPS: MockTrip[] = [
     ]
   },
   {
-    ownerEmail: "demo.admin@travel-trackr.local",
+    ownerEmail: "demo.admin@example.com",
     title: "Toscana in bici",
     category: "roadtrip",
     status: "ongoing",
@@ -552,7 +552,7 @@ const DEMO_TRIPS: MockTrip[] = [
     ]
   },
   {
-    ownerEmail: "demo.admin@travel-trackr.local",
+    ownerEmail: "demo.admin@example.com",
     title: "Giappone autunno",
     category: "vacanza",
     status: "planned",
@@ -564,7 +564,7 @@ const DEMO_TRIPS: MockTrip[] = [
     stages: []
   },
   {
-    ownerEmail: "demo.admin@travel-trackr.local",
+    ownerEmail: "demo.admin@example.com",
     title: "Ferrata Michielli-Strobel",
     category: "escursione",
     status: "completed",

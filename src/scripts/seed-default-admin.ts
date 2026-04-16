@@ -3,16 +3,21 @@ import { connectDatabase, disconnectDatabase } from "../config/database.js";
 import { User } from "../modules/user/user.model.js";
 
 const DEFAULT_ADMIN_EMAIL =
-  process.env.DEFAULT_ADMIN_EMAIL || "admin@travel-trackr.local";
-const DEFAULT_ADMIN_PASSWORD =
-  process.env.DEFAULT_ADMIN_PASSWORD || "ChangeMe123!";
+  process.env.DEFAULT_ADMIN_EMAIL || "loris.beltramo@gmail.com";
+const DEFAULT_ADMIN_PASSWORD = process.env.DEFAULT_ADMIN_PASSWORD;
 const DEFAULT_ADMIN_NAME =
-  process.env.DEFAULT_ADMIN_NAME || "Default Admin";
+  process.env.DEFAULT_ADMIN_NAME || "Loris Beltramo";
 
 const seedDefaultAdmin = async (): Promise<void> => {
   await connectDatabase();
 
   const email = DEFAULT_ADMIN_EMAIL.toLowerCase().trim();
+  if (!DEFAULT_ADMIN_PASSWORD?.trim()) {
+    throw new Error(
+      "[default-admin] DEFAULT_ADMIN_PASSWORD is required. Set it via environment variable before seeding."
+    );
+  }
+
   const existing = await User.findOne({ email });
 
   if (existing) {
@@ -24,7 +29,7 @@ const seedDefaultAdmin = async (): Promise<void> => {
 
   await User.create({
     email,
-    passwordHash: DEFAULT_ADMIN_PASSWORD,
+    passwordHash: DEFAULT_ADMIN_PASSWORD.trim(),
     name: DEFAULT_ADMIN_NAME,
     role: "admin",
     mustChangePassword: true,

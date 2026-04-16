@@ -37,17 +37,6 @@ cp .env.example .env
 node src/index.js
 ```
 
-Per testare l'app senza MongoDB esterno:
-
-```bash
-npm run start:mock
-```
-
-In modalita mock vengono creati automaticamente utenti demo (idempotenti):
-
-- email: `demo.user@travel-trackr.local` - password: `Password123!`
-- email: `demo.admin@travel-trackr.local` - password: `Password123!`
-
 Per creare un admin di default in modo one-shot (solo se non esiste gia):
 
 ```bash
@@ -56,13 +45,9 @@ npm run seed:default-admin
 
 Variabili opzionali per il comando one-shot:
 
-- `DEFAULT_ADMIN_EMAIL` (default: `admin@travel-trackr.local`)
-- `DEFAULT_ADMIN_PASSWORD` (default: `ChangeMe123!`)
-- `DEFAULT_ADMIN_NAME` (default: `Default Admin`)
-
-Per disattivare il seed automatico imposta `SEED_MOCK_DATA=false`.
-
-I mock includono piu scenari travel (planned/ongoing/completed/cancelled, con e senza attivita, con dati tecnici outdoor completi/parziali).
+- `DEFAULT_ADMIN_EMAIL` (default: `loris.beltramo@gmail.com`)
+- `DEFAULT_ADMIN_PASSWORD` (**obbligatoria**, nessun default)
+- `DEFAULT_ADMIN_NAME` (default: `Loris Beltramo`)
 
 Server locale: http://localhost:3000
 
@@ -82,17 +67,21 @@ Se stai prendendo in mano il progetto adesso:
 | PORT | Porta server | 3000 |
 | NODE_ENV | Ambiente runtime | development |
 | MONGODB_URI | Connessione MongoDB | mongodb://127.0.0.1:27017/travel-trackr |
-| SESSION_SECRET | Segreto session cookie | dev-session-secret |
+| SESSION_SECRET | Segreto session cookie | `dev-session-secret` (dev), **obbligatoria** in production |
 | ACCESS_TOKEN_SECRET | Segreto firma access token | dev-access-secret |
 | REFRESH_TOKEN_SECRET | Segreto firma refresh token | dev-refresh-secret |
 | ACCESS_TOKEN_TTL | Durata access token | 15m |
 | REFRESH_TOKEN_DAYS | Giorni validita refresh token | 30 |
-| CORS_ORIGIN | Origin frontend consentita | http://localhost:5173 |
-| USE_IN_MEMORY_DB | Se true usa mongodb-memory-server | false |
-| SEED_MOCK_DATA | Se true crea utenti demo in start:mock | true |
+| CORS_ORIGIN | Origin frontend consentita | `http://localhost:5173` (dev), **obbligatoria** in production |
+| APP_BASE_PATH | Prefisso app dietro reverse proxy (es. `/travelTracker`) | vuoto |
+| SESSION_COOKIE_SECURE | Override cookie secure (`true`/`false`) | auto in production, false in dev |
+| DEFAULT_ADMIN_EMAIL | Email admin seed one-shot | loris.beltramo@gmail.com |
+| DEFAULT_ADMIN_PASSWORD | Password admin seed one-shot | obbligatoria |
+| DEFAULT_ADMIN_NAME | Nome admin seed one-shot | Loris Beltramo |
 | ENABLE_DB_BACKUP_CRON | Se true attiva cron backup in-process | false |
 | DB_BACKUP_CRON | Espressione cron backup | 0 3 * * * |
 | DB_BACKUP_RUN_ON_STARTUP | Esegue backup subito all'avvio cron | false |
+| DB_BACKUP_RETENTION_COUNT | Numero massimo cartelle backup da mantenere | 7 |
 | BACKUP_OUTPUT_DIR | Cartella output backup | ./backups |
 | BACKUP_DB_NAME | Nome db da esportare | travel-trackr |
 

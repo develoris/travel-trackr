@@ -16,14 +16,13 @@ File principali:
 Responsabilita principali:
 
 1. src/index.js: carica env e avvia bootstrap.
-2. bootstrap.js: connessione DB, seed mock opzionale, backup cron opzionale, start server.
+2. bootstrap.js: connessione DB, backup cron opzionale, start server.
 3. create-app.js: costruisce app Express con middleware globali, sessione e router.
 4. register-shutdown.js: gestione SIGINT/SIGTERM e chiusura pulita DB/server.
 
 Modalita DB:
 
 1. Standard: usa MONGODB_URI.
-2. Demo/mock: con USE_IN_MEMORY_DB=true avvia Mongo in-memory (mongodb-memory-server) e seed dati demo.
 
 ## 2. Moduli applicativi
 

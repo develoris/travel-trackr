@@ -1,10 +1,11 @@
 import "dotenv/config";
-import { mkdir, writeFile } from "fs/promises";
+import { mkdir, readdir, rm, writeFile } from "fs/promises";
 import { resolve, join } from "path";
 import { MongoClient } from "mongodb";
 
 const DEFAULT_URI = "mongodb://127.0.0.1:27017/travel-trackr";
 const DEFAULT_OUTPUT_DIR = "./backups";
+const DEFAULT_RETENTION_COUNT = 7;
 
 interface BackupResult {
   collection: string;
@@ -25,6 +26,13 @@ interface Logger {
   log: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
 }
+
+const parseRetentionCount = (value?: string): number => {
+  if (!value?.trim()) return DEFAULT_RETENTION_COUNT;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) return DEFAULT_RETENTION_COUNT;
+  return parsed;
+};
 
 const getDbNameFromUri = (uri: string): string => {
   try {
@@ -53,8 +61,34 @@ interface RunMongoBackupOptions {
   uri?: string;
   dbName?: string;
   outputDir?: string;
+  retentionCount?: number;
   logger?: Logger;
 }
+
+const applyBackupRetention = async ({
+  rootDir,
+  retentionCount,
+  logger
+}: {
+  rootDir: string;
+  retentionCount: number;
+  logger: Logger;
+}): Promise<void> => {
+  if (retentionCount <= 0) return;
+
+  const dirEntries = await readdir(rootDir, { withFileTypes: true });
+  const backupFolders = dirEntries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort((a, b) => b.localeCompare(a));
+
+  const foldersToDelete = backupFolders.slice(retentionCount);
+
+  for (const folderName of foldersToDelete) {
+    await rm(join(rootDir, folderName), { recursive: true, force: true });
+    logger.log(`[backup] Retention removed old backup: ${folderName}`);
+  }
+};
 
 export const runMongoBackup = async ({
   uri = process.env.MONGODB_URI || DEFAULT_URI,
@@ -62,6 +96,7 @@ export const runMongoBackup = async ({
     process.env.BACKUP_DB_NAME ||
     getDbNameFromUri(process.env.MONGODB_URI || DEFAULT_URI),
   outputDir = process.env.BACKUP_OUTPUT_DIR || DEFAULT_OUTPUT_DIR,
+  retentionCount = parseRetentionCount(process.env.DB_BACKUP_RETENTION_COUNT),
   logger = console
 }: RunMongoBackupOptions = {}): Promise<BackupMetadata> => {
   const startedAt = new Date();
@@ -104,6 +139,8 @@ export const runMongoBackup = async ({
       JSON.stringify(metadata, null, 2),
       "utf8"
     );
+
+    await applyBackupRetention({ rootDir, retentionCount, logger });
 
     logger.log(
       `[backup] Completed: ${results.length} collections in ${backupDir}`

@@ -30,7 +30,13 @@ Cron worker standalone:
 - `BACKUP_DB_NAME`: nome db da esportare.
 - `DB_BACKUP_CRON`: espressione cron (default `0 3 * * *`).
 - `DB_BACKUP_RUN_ON_STARTUP`: se true, fa backup all'avvio worker.
+- `DB_BACKUP_RETENTION_COUNT`: numero massimo cartelle backup da mantenere (default `7`).
 - `ENABLE_DB_BACKUP_CRON`: se true, avvia cron dentro il server web.
+
+Retention automatica:
+
+- Ad ogni backup completato viene applicata la retention nella cartella output.
+- Restano solo gli ultimi `DB_BACKUP_RETENTION_COUNT` backup, i piu vecchi vengono rimossi.
 
 ## Modalita consigliata produzione
 

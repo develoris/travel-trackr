@@ -29,6 +29,19 @@ interface CreateAppOptions {
   sessionStore?: session.Store;
 }
 
+const resolveRequiredEnv = (
+  envName: string,
+  isProduction: boolean,
+  developmentFallback: string
+): string => {
+  const value = process.env[envName]?.trim();
+  if (value) return value;
+  if (isProduction) {
+    throw new Error(`[config] Missing required environment variable: ${envName}`);
+  }
+  return developmentFallback;
+};
+
 const resolveSessionCookieSecure = (
   isProduction: boolean
 ): boolean | "auto" => {
@@ -77,6 +90,16 @@ export const createApp = ({
   const app = express();
   const configuredBasePath = normalizeBasePath(process.env.APP_BASE_PATH);
   const cookieSecure = resolveSessionCookieSecure(isProduction);
+  const sessionSecret = resolveRequiredEnv(
+    "SESSION_SECRET",
+    isProduction,
+    "dev-session-secret"
+  );
+  const corsOrigin = resolveRequiredEnv(
+    "CORS_ORIGIN",
+    isProduction,
+    "http://localhost:5173"
+  );
 
   // Required behind reverse proxy so req.secure and forwarded headers are handled correctly.
   app.set("trust proxy", 1);
@@ -90,7 +113,7 @@ export const createApp = ({
 
   app.use(
     cors({
-      origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+      origin: corsOrigin,
       credentials: true
     })
   );
@@ -145,7 +168,7 @@ export const createApp = ({
   app.use(
     session({
       name: "tt.sid",
-      secret: process.env.SESSION_SECRET || "dev-session-secret",
+      secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
       store: resolvedSessionStore,

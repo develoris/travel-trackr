@@ -25,8 +25,8 @@ URL locale (sviluppo):
 
 Credenziali demo disponibili:
 
-- Utente standard: demo.user@travel-trackr.local / Password123!
-- Utente admin: demo.admin@travel-trackr.local / Password123!
+- Utente standard: demo.user@example.com / Password123!
+- Utente admin: demo.admin@example.com / Password123!
 
 Quando usi account demo, i dati possono essere rigenerati dal seed mock.
 

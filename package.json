@@ -7,7 +7,6 @@
     "build": "tsc && node scripts/copy-views.mjs",
     "start": "node dist/src/index.js",
     "dev": "tsx src/index.ts",
-    "start:mock": "tsx src/scripts/start-mock.ts",
     "seed:default-admin": "tsx src/scripts/seed-default-admin.ts",
     "backup:db": "tsx src/scripts/backup-db.ts",
     "backup:cron": "tsx src/scripts/backup-cron.ts",
@@ -34,7 +33,6 @@
     "js-yaml": "^4.1.1",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.1.0",
-    "mongodb-memory-server": "^10.4.3",
     "mongoose": "^9.3.0",
     "node-cron": "^4.2.1",
     "pdfkit": "^0.17.2",
@@ -57,6 +55,7 @@
     "jest": "^30.3.0",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.6",
+    "mongodb-memory-server": "^10.4.3",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
