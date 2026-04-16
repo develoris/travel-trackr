@@ -29,6 +29,15 @@ interface CreateAppOptions {
   sessionStore?: session.Store;
 }
 
+const resolveSessionCookieSecure = (
+  isProduction: boolean
+): boolean | "auto" => {
+  const rawValue = (process.env.SESSION_COOKIE_SECURE || "").trim().toLowerCase();
+  if (rawValue === "true") return true;
+  if (rawValue === "false") return false;
+  return isProduction ? "auto" : false;
+};
+
 const normalizeBasePath = (value?: string): string => {
   if (!value) return "";
   const trimmed = value.trim();
@@ -67,6 +76,10 @@ export const createApp = ({
 }: CreateAppOptions): Express => {
   const app = express();
   const configuredBasePath = normalizeBasePath(process.env.APP_BASE_PATH);
+  const cookieSecure = resolveSessionCookieSecure(isProduction);
+
+  // Required behind reverse proxy so req.secure and forwarded headers are handled correctly.
+  app.set("trust proxy", 1);
 
   const resolvedSessionStore =
     sessionStore ||
@@ -138,7 +151,7 @@ export const createApp = ({
       store: resolvedSessionStore,
       cookie: {
         httpOnly: true,
-        secure: isProduction,
+        secure: cookieSecure,
         sameSite: "lax",
         maxAge: 1000 * 60 * 60 * 24 * 30
       }
