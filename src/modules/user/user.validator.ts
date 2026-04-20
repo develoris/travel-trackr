@@ -40,7 +40,7 @@ export const appLoginValidator: RequestHandler[] = [
     .bail()
     .isEmail()
     .withMessage("Email non valida")
-    .normalizeEmail(),
+    .toLowerCase(),
   body("password")
     .isString()
     .withMessage("Password obbligatoria")
@@ -57,7 +57,7 @@ export const appRegisterValidator: RequestHandler[] = [
     .bail()
     .isEmail()
     .withMessage("Email non valida")
-    .normalizeEmail(),
+    .toLowerCase(),
   body("password")
     .isString()
     .withMessage("Password obbligatoria")
@@ -85,7 +85,7 @@ export const appAdminCreateUserValidator: RequestHandler[] = [
     .bail()
     .isEmail()
     .withMessage("Email non valida")
-    .normalizeEmail(),
+    .toLowerCase(),
   body("name")
     .optional({ values: "falsy" })
     .trim()
